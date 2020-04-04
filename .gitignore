@@ -1,5 +1,7 @@
-.idea/**
+**/.idea/**
 */*.iml
 **/elm-stuff/**
 server/project/**
 server/target/**
+
+**/node_modules/**
