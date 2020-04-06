@@ -1,0 +1,1 @@
+This project is based on [typescript-react-hot-reload](https://github.com/chunliu/typescript-react-hot-reload).
