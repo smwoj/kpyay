@@ -65,7 +65,7 @@ function useWindowSize() {
     return size;
 }
 
-const App: React.Component<{}, {}> = () => {
+const App = () => {
     const [width, height] = useWindowSize();
 
     const chartWidth = width > 800 ? width / 2 : width;

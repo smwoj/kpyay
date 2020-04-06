@@ -11,11 +11,11 @@
     "clean": "rd /s/q built",
     "prepare": "tsc && webpack --progress --config webpack.prod.config.js"
   },
-  "author": "Chun Liu",
+  "author": "Wojciech Smołka",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chunliu/typescript-react-hot-reload"
+    "url": "https://github.com/smwoj/kp-ayy"
   },
   "dependencies": {
     "@types/recharts": "^1.8.9",
