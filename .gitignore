@@ -4,4 +4,6 @@
 server/project/**
 server/target/**
 
+**/dist/**
+**/built/**
 **/node_modules/**
