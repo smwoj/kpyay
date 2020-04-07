@@ -1,9 +1,30 @@
 import * as React from "react";
-import {useWindowSize} from '../hooks'
-import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid,
-} from 'recharts';
+import {Provider} from "react-redux";
+import {configureStore, initStore} from "../store/init";
+import {CartesianGrid, Line, LineChart, XAxis, YAxis} from "recharts";
+import {useWindowSize} from "./hooks";
 
+const store = configureStore();
+store.dispatch<any>(initStore());
+
+
+interface ChartProps {
+    width: number,
+    height: number,
+    data: { uv: number, pv: number, name: string, amt: number }[],
+}
+
+const Chart: React.FC<ChartProps> = (props: ChartProps) => {
+    return <div className="chartBox">
+        <LineChart width={props.width} height={props.height} data={props.data}>
+            <XAxis dataKey="name"/>
+            <YAxis/>
+            <CartesianGrid stroke="#eeeeee" strokeDasharray="5 5"/>
+            <Line type="monotone" dataKey="uv" stroke="red  "/>
+            <Line type="monotone" dataKey="pv" stroke="#82ca9d"/>
+        </LineChart>
+    </div>
+};
 
 const data = [
     {
@@ -29,25 +50,6 @@ const data = [
     },
 ];
 
-
-interface ChartProps {
-    width: number,
-    height: number,
-    data: { uv: number, pv: number, name: string, amt: number }[],
-}
-
-const Chart: React.FC<ChartProps> = (props: ChartProps) => {
-    return <div className="chartBox">
-        <LineChart width={props.width} height={props.height} data={props.data}>
-            <XAxis dataKey="name"/>
-            <YAxis/>
-            <CartesianGrid stroke="#eeeeee" strokeDasharray="5 5"/>
-            <Line type="monotone" dataKey="uv" stroke="red"/>
-            <Line type="monotone" dataKey="pv" stroke="#82ca9d"/>
-        </LineChart>
-    </div>
-};
-
 const App = () => {
     const [width, height] = useWindowSize();
 
@@ -55,13 +57,15 @@ const App = () => {
     const chartHeight = height >= 300 ? 300 : height;
 
     return (
-        <div className="App">
-            <header className="App-header">
-                <br/>
-                <Chart width={chartWidth} height={chartHeight} data={data}/>
-                <Chart width={chartWidth} height={chartHeight} data={data}/>
-            </header>
-        </div>
+        <Provider store={store}>
+            <div className="App">
+                <header className="App-header">
+                    <br/>
+                    <Chart width={chartWidth} height={chartHeight} data={data}/>
+                    <Chart width={chartWidth} height={chartHeight} data={data}/>
+                </header>
+            </div>
+        </Provider>
     );
 };
 
