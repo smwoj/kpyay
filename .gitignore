@@ -4,6 +4,9 @@
 server/project/**
 server/target/**
 
+**/.ipynb_checkpoints/**
+**/venv/**
+
 **/dist/**
 **/built/**
 **/node_modules/**
