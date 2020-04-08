@@ -17,4 +17,4 @@ export const initStoreAction = (): IInitStoreAction => {
 
 export const doNothingAction = (): IDoNothing => {
     return {type: ActionTypes.DO_NOTHING}
-}
+};

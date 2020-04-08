@@ -18,17 +18,22 @@ const App = () => {
 
     const state: AppState = store.getState();
 
+    const charts: JSX.Element[] = Object.entries(state.chartsData).map(
+        ([metricId, points]) => {
+            return <Chart key={metricId} width={chartWidth} height={chartHeight} data={points} name={metricId}/>;
+        }
+    );
+    // tslint:disable-next-line:no-console
+    console.log(charts.length);
+    // tslint:disable-next-line:no-console
+    console.log(state);
     return (
         <Provider store={store}>
             <div className="App">
                 <header className="App-header">
                     <h1>Twoja stara cedzi kaszę xDDD</h1>
                     <br/>
-                    {
-                        Object.entries(state.chartsData).map(([metricId, points]) => {
-                            return <Chart width={chartWidth} height={chartHeight} data={points} name={metricId}/>;
-                        })
-                    }
+                    <div>{charts}</div>
                 </header>
             </div>
         </Provider>

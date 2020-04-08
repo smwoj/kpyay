@@ -1,4 +1,6 @@
-[
+import {RawPoint} from "./data";
+
+export const SLOTHS_PASTRY_POINTS: RawPoint[] = [
   {
     "params": {
       "classifier": "random-forest",

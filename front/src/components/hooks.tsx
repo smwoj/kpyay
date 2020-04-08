@@ -1,7 +1,6 @@
 import {useLayoutEffect, useState} from "react";
 
-/** Allows components to be re-rendered upon window dimensions change.
- * Based on https://stackoverflow.com/a/19014495 */
+/** Allows components to be re-rendered upon window dimensions change. Based on https://stackoverflow.com/a/19014495 */
 export function useWindowSize() {
     const [size, setSize] = useState([0, 0]);
 

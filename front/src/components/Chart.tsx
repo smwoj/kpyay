@@ -11,36 +11,38 @@ export interface ChartProps {
     data: metricPoint[],
 }
 
-const hash_params = (params: { [param: string]: string }): string => {
+const hashParams = (params: { [param: string]: string }): string => {
     return Object.keys(params).sort().map((key: string) => {
         return `${key}=${params[key]}`;
     }).join(', ')
 };
 
-const toLine = (params_hash: string, mps: metricPoint[]): JSX.Element => {
+const toLine = (paramsHash: string, mps: metricPoint[]): JSX.Element => {
     return (
-        <Line type="monotone" dataKey="uv" stroke="red  ">
+        <Line type="monotone" key={paramsHash} dataKey="value" stroke="red" data={mps}>
             <LabelList dataKey="version" position="insideTop"/>
+            <XAxis dataKey="version" />
         </Line>
     );
 };
 
 export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
-    let strokes: Map<string, metricPoint[]> = new Map();
+    const strokes: Map<string, metricPoint[]> = new Map();
 
-    // todo - make a nice defaultdict / groupingMap as a library collection
     props.data.forEach((mp) => {
-        const hashed_params: string = hash_params(mp.params);
-        const bucket = strokes.get(hashed_params);
-        if (bucket == undefined) {
-            strokes.set(hashed_params, [mp]);
+        const hashedParams: string = hashParams(mp.params);
+        const bucket = strokes.get(hashedParams);
+
+        if (bucket === undefined) {
+            strokes.set(hashedParams, [mp]);
         } else {
             bucket.push(mp);
         }
     });
+
     const lines: JSX.Element[] = [];
-    strokes.forEach((mp, hashed_params) => {
-        lines.push(toLine(hashed_params, mp));
+    strokes.forEach((mp, hashedParams) => {
+        lines.push(toLine(hashedParams, mp));
     });
 
 
