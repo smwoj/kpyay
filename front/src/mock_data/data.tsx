@@ -17,9 +17,9 @@ export const parsePoints = (json: string): metricPoint[] => {
     });
 };
 
-export const DOGS_VS_MUFFINS_FSCORES: metricPoint[] = parsePoints(
-    fs.readFileSync('./dogs_muffins_classifiers.json')
-);
 export const SLOTHS_VS_PASTRY_FSCORES: metricPoint[] = parsePoints(
     fs.readFileSync('./sloths_pastry_classifiers.json')
+);
+export const DOGS_VS_MUFFINS_FSCORES: metricPoint[] = parsePoints(
+    fs.readFileSync('./dogs_muffins_classifiers.json')
 );

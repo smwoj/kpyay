@@ -1,54 +1,14 @@
 import * as React from "react";
 import {Provider} from "react-redux";
 import {configureStore, initStore} from "../store/init";
-import {CartesianGrid, Line, LineChart, XAxis, YAxis} from "recharts";
 import {useWindowSize} from "./hooks";
+import {Chart} from "./Chart";
+import {AppState} from "../store/models";
+
 
 const store = configureStore();
 store.dispatch<any>(initStore());
 
-
-interface ChartProps {
-    width: number,
-    height: number,
-    data: { uv: number, pv: number, name: string, amt: number }[],
-}
-
-const Chart: React.FC<ChartProps> = (props: ChartProps) => {
-    return <div className="chartBox">
-        <LineChart width={props.width} height={props.height} data={props.data}>
-            <XAxis dataKey="name"/>
-            <YAxis/>
-            <CartesianGrid stroke="#eeeeee" strokeDasharray="5 5"/>
-            <Line type="monotone" dataKey="uv" stroke="red  "/>
-            <Line type="monotone" dataKey="pv" stroke="#82ca9d"/>
-        </LineChart>
-    </div>
-};
-
-const data = [
-    {
-        name: 'A', uv: 4000, pv: 2400, amt: 2400,
-    },
-    {
-        name: 'B', uv: 3000, pv: 1398, amt: 2210,
-    },
-    {
-        name: 'C', uv: 2000, pv: 9800, amt: 2290,
-    },
-    {
-        name: 'D', uv: 2780, pv: 3908, amt: 2000,
-    },
-    {
-        name: 'E', uv: 1890, pv: 4800, amt: 2181,
-    },
-    {
-        name: 'F', uv: 2390, pv: 3800, amt: 2500,
-    },
-    {
-        name: 'G', uv: 3490, pv: 4300, amt: 2100,
-    },
-];
 
 const App = () => {
     const [width, height] = useWindowSize();
@@ -56,13 +16,19 @@ const App = () => {
     const chartWidth = width >= 600 ? 600 : width;
     const chartHeight = height >= 300 ? 300 : height;
 
+    const state: AppState = store.getState();
+
     return (
         <Provider store={store}>
             <div className="App">
                 <header className="App-header">
+                    <h1>Twoja stara cedzi kaszę xDDD</h1>
                     <br/>
-                    <Chart width={chartWidth} height={chartHeight} data={data}/>
-                    <Chart width={chartWidth} height={chartHeight} data={data}/>
+                    {
+                        Object.entries(state.chartsData).map(([metricId, points]) => {
+                            return <Chart width={chartWidth} height={chartHeight} data={points} name={metricId}/>;
+                        })
+                    }
                 </header>
             </div>
         </Provider>
