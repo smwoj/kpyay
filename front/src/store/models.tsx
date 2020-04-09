@@ -2,7 +2,7 @@ export interface metricPoint {
     value: number,
     version?: string,
     params: { [param: string]: string }
-    timestamp?: Date,
+    timestamp: Date,
     posted_ts: Date,
 }
 

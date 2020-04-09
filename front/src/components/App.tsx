@@ -23,10 +23,6 @@ const App = () => {
             return <Chart key={metricId} width={chartWidth} height={chartHeight} data={points} name={metricId}/>;
         }
     );
-    // tslint:disable-next-line:no-console
-    console.log(charts.length);
-    // tslint:disable-next-line:no-console
-    console.log(state);
     return (
         <Provider store={store}>
             <div className="App">

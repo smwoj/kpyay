@@ -6,12 +6,12 @@ export interface RawPoint {
     value: number,
     version?: string,
     params: { [param: string]: string }
-    timestamp?: string,
+    timestamp: string,
     posted_ts: string,
 }
 
 const rawPointToMetric = (rp: RawPoint): metricPoint => {
-    const timestamp: Date | undefined = rp.timestamp ? new Date(rp.timestamp) : undefined;
+    const timestamp: Date = new Date(rp.timestamp);
     return {...rp, posted_ts: new Date(rp.posted_ts), timestamp};
 };
 

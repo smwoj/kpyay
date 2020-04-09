@@ -22,11 +22,9 @@ export const rootReducer = (
         case ActionTypes.INIT_STORE:
             // if (process.env.USE_MOCK_DATA) {
                 // TODO handle it more gracefully so these dumps aren't included in prod build
-                // tslint:disable-next-line:no-console
                 console.log("WARNING: Using mock initial state!");
                 return MOCK_INIT_STATE;
             // } else {
-                // tslint:disable-next-line:no-console
                 // console.log("WARNING: Using PROD STATE!");
                 // return PROD_INIT_STATE;
             // }
