@@ -12,21 +12,21 @@ export class Version {
     readonly minor: number;
     readonly bugfix: number;
 
+    static parse(str: string): Version {
+        const segments = str.split('.').map(x => Number.parseInt(x, 10));
+        if (segments.some(Number.isNaN)) {
+            throw `str is broken: ${str}: part of it is not parseable as int`;
+        }
+        return new this(segments[0], segments[1], segments[2]);
+    }
+
     constructor(major: number, minor: number, bugfix: number) {
         this.major = major;
         this.minor = minor;
         this.bugfix = bugfix;
     }
 
-    static parse(str: string): Version {
-        const versionSegments = str.split('.').map(Number.parseInt);
-        if (versionSegments.length != 3) {
-            throw `expected '${str}' to have 3 version segments`
-        }
-        return new this(...versionSegments);
-    }
-
-    static ordRising(left: Version, right: Version): number {
+    static ordAsc(left: Version, right: Version): number {
         if (left.major !== right.major) {
             return left.major - right.major;
         } else if (left.minor !== right.minor) {
@@ -36,8 +36,8 @@ export class Version {
         }
     }
 
-    static ordFalling(left: Version, right: Version): number {
-        return -Version.ordRising(left, right);
+    static ordDesc(left: Version, right: Version): number {
+        return -Version.ordAsc(left, right);
     }
 }
 
