@@ -1,4 +1,4 @@
-import {RawPoint} from "./data";
+import {RawPoint} from '../store/models'
 
 export const DOGS_MUFFINS_POINTS: RawPoint[] = [
     {

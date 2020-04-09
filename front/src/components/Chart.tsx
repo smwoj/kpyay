@@ -1,6 +1,7 @@
 import * as React from "react";
 import {CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis} from "recharts";
 import {metricPoint} from "../store/models";
+import Any = jasmine.Any;
 
 // import * as _ from 'underscore'
 
@@ -26,15 +27,33 @@ const toLine = (paramsHash: string, mps: metricPoint[]): JSX.Element => {
         </Line>
     );
 };
-const metricPointsCmp = (p1: metricPoint, p2: metricPoint): number => {
+const timestampOrd = (p1: metricPoint, p2: metricPoint): number => {
     // wtf, https://github.com/microsoft/TypeScript/issues/5710
     return (+p1.timestamp) - (+p2.timestamp);
 };
 
-// const fmtDate = (date: Date) => {
-//     // console.log(date);
-//     return date.toISOString().slice(0, 20);
+// const versionOrd = (p1: metricPoint, p2: metricPoint): number => {
+//     // wtf, https://github.com/microsoft/TypeScript/issues/5710
+//     return (+p1.timestamp) - (+p2.timestamp);
 // };
+//
+// // class VersionData {
+//     readonly _version: string;
+//
+//     // TODO: assert the same paramsHash
+//     static fromPoints(mps: metricPoint[]): VersionData {
+//         return new this(
+//
+//         )
+//     }
+//
+//     constructor (version: string, ) {
+//         this._version = version;
+//         this._sfdfsdf
+//     }
+//     // values: {[hashedParams: string]: number},
+// }
+
 
 const CustomizedAxisTick = (props) => {
     const {x, y, payload} = props;
@@ -50,7 +69,7 @@ const CustomizedAxisTick = (props) => {
 export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
     const strokes: Map<string, metricPoint[]> = new Map();
 
-    props.data.slice().sort(metricPointsCmp).forEach((mp) => {
+    props.data.slice().sort(timestampOrd).forEach((mp) => {
         const hashedParams: string = hashParams(mp.params);
         const bucket = strokes.get(hashedParams);
 
@@ -76,7 +95,6 @@ export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
                 // dataKey={(mp) => fmtDate(mp.timestamp)}
                 dataKey="version"
                 height={50}
-                // tick={<CustomizedAxisTick/>}
                 tick={<CustomizedAxisTick />}
             />
             <YAxis type="number" domain={[0.5, 1.1]}/>
