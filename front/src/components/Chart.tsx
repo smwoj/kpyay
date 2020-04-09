@@ -1,20 +1,18 @@
 import * as React from "react";
 import {CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis} from "recharts";
-import {metricPoint} from "../store/models";
-import Any = jasmine.Any;
+import {Point, Version} from "../store/models";
+import * as _ from "underscore";
 
-// import * as _ from 'underscore'
 
 export interface ChartProps {
     width: number,
     height: number,
     name: string,
-    data: metricPoint[],
+    data: Point[],
 }
 
 
-const toLine = (paramsHash: string, mps: metricPoint[]): JSX.Element => {
-    // console.log(mps);
+const toLine = (paramsHash: string, mps: Point[]): JSX.Element => {
     return (
         <Line type="monotone" key={paramsHash} dataKey="value" stroke="red" data={mps}>
             {/*<LabelList dataKey="version" position="insideTop"/>*/}
@@ -35,40 +33,40 @@ const CustomizedAxisTick = (props) => {
     );
 };
 
+type ChartDataPoint = { version: string, values: { [paramsHash: string]: number } };
+type ChartData = ChartDataPoint[];
+
 export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
-    const strokes: Map<string, metricPoint[]> = new Map();
-
-    props.data.slice().sort(timestampOrd).forEach((mp) => {
-        const hashedParams: string = hashParams(mp.params);
-        const bucket = strokes.get(hashedParams);
-
-        if (bucket === undefined) {
-            strokes.set(hashedParams, [mp]);
-        } else {
-            bucket.push(mp);
-        }
+    const pointsByVersion = _.groupBy(props.data, p => p._version?.toString());  // one key may be null
+    const data: ChartData = _.map(pointsByVersion, (ps, version) => {
+        return {
+            version: version,
+            values: _.object(ps.map(p => [p.paramsHash(), p._value])),
+        };
     });
 
-    const lines: JSX.Element[] = [];
-    strokes.forEach((mps, hashedParams) => {
-        lines.push(toLine(hashedParams, mps));
-    });
+    const hashes = _.uniq(_.map(props.data, p => p.paramsHash()), false);
+    const lines = _.map(hashes, hash => (
+            <Line key={hash} type="monotone" dataKey={(dp: ChartDataPoint)=> dp.values[hash]} stroke="#8884d8"/>
+        )
+    );
 
     return <div className="chartBox">
         <LineChart
             width={props.width}
             height={props.height}
-            data={props.data}>
+            data={data}
+        >
             <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
             <XAxis
                 dataKey="version"
                 height={50}
-                tick={<CustomizedAxisTick />}
+                tick={<CustomizedAxisTick/>}
             />
             <YAxis type="number" domain={[0.5, 1.1]}/>
             <CartesianGrid stroke="#eeeeee" strokeDasharray="5 5"/>
             {lines}
-            <Tooltip></Tooltip>
+            <Tooltip/>
         </LineChart>
     </div>
 };
