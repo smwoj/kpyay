@@ -39,6 +39,10 @@ export class Version {
     static ordDesc(left: Version, right: Version): number {
         return -Version.ordAsc(left, right);
     }
+
+    toString(): string {
+        return `${this.major}.${this.minor}.${this.bugfix}`;
+    }
 }
 
 export class Point {
@@ -75,6 +79,20 @@ export class Point {
             .map(key => `${key}=${this._params[key]}`)
             .join(', ')
     };
+
+    static ascVersion(left: Point, right: Point): number {
+        if (left._version && right._version) {
+            return Version.ordAsc(left._version, right._version);
+        } else {
+            throw `cannot cmp points; at least one does not have version. left: ${left}, right: ${right}`
+        }
+    }
+
+    static ascTimestamp(left: Point, right: Point): number {
+        // sad workaround for https://github.com/microsoft/TypeScript/issues/5710
+        return (+left._timestamp) - (+right._timestamp);
+    }
+
 }
 
 export interface AppState {

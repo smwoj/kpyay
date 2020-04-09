@@ -22,10 +22,6 @@ const toLine = (paramsHash: string, mps: metricPoint[]): JSX.Element => {
         </Line>
     );
 };
-const timestampOrd = (p1: metricPoint, p2: metricPoint): number => {
-    // wtf, https://github.com/microsoft/TypeScript/issues/5710
-    return (+p1.timestamp) - (+p2.timestamp);
-};
 
 
 const CustomizedAxisTick = (props) => {
