@@ -52,9 +52,7 @@ export class Point {
         const {value, version, params, timestamp, posted_ts} = rp;
         const parsed_version = version ? Version.parse(version) : null;
 
-        return new this(
-            value, parsed_version, params, new Date(timestamp), new Date(posted_ts)
-        );
+        return new this(value, parsed_version, params, new Date(timestamp), new Date(posted_ts));
     };
 
     constructor(
@@ -70,6 +68,13 @@ export class Point {
         this._timestamp = timestamp;
         this._posted_ts = posted_ts;
     }
+
+    paramsHash(): string {
+        return Object.keys(this._params)
+            .sort()
+            .map(key => `${key}=${this._params[key]}`)
+            .join(', ')
+    };
 }
 
 export interface AppState {

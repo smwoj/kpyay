@@ -12,11 +12,6 @@ export interface ChartProps {
     data: metricPoint[],
 }
 
-const hashParams = (params: { [param: string]: string }): string => {
-    return Object.keys(params).sort().map((key: string) => {
-        return `${key}=${params[key]}`;
-    }).join(', ')
-};
 
 const toLine = (paramsHash: string, mps: metricPoint[]): JSX.Element => {
     // console.log(mps);
@@ -31,28 +26,6 @@ const timestampOrd = (p1: metricPoint, p2: metricPoint): number => {
     // wtf, https://github.com/microsoft/TypeScript/issues/5710
     return (+p1.timestamp) - (+p2.timestamp);
 };
-
-// const versionOrd = (p1: metricPoint, p2: metricPoint): number => {
-//     // wtf, https://github.com/microsoft/TypeScript/issues/5710
-//     return (+p1.timestamp) - (+p2.timestamp);
-// };
-//
-// // class VersionData {
-//     readonly _version: string;
-//
-//     // TODO: assert the same paramsHash
-//     static fromPoints(mps: metricPoint[]): VersionData {
-//         return new this(
-//
-//         )
-//     }
-//
-//     constructor (version: string, ) {
-//         this._version = version;
-//         this._sfdfsdf
-//     }
-//     // values: {[hashedParams: string]: number},
-// }
 
 
 const CustomizedAxisTick = (props) => {
@@ -92,7 +65,6 @@ export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
             data={props.data}>
             <CartesianGrid stroke="#ccc" strokeDasharray="5 5"/>
             <XAxis
-                // dataKey={(mp) => fmtDate(mp.timestamp)}
                 dataKey="version"
                 height={50}
                 tick={<CustomizedAxisTick />}
