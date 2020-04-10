@@ -4,7 +4,11 @@ import { configureStore, initStore } from "../store/init";
 import { useWindowSize } from "./hooks";
 import { Chart } from "./Chart";
 import { AppState } from "../store/models";
-import { deleteChartAction, addRestrictionAction } from "../store/actions";
+import {
+  deleteChartAction,
+  addRestrictionAction,
+  groupByAction,
+} from "../store/actions";
 import "./../styles.css";
 
 const store = configureStore();
@@ -32,6 +36,9 @@ const App = () => {
           }}
           select={(chartId, restriction) => {
             store.dispatch(addRestrictionAction(chartId, restriction));
+          }}
+          groupBy={(chartId, param) => {
+            store.dispatch(groupByAction(chartId, param));
           }}
         />
       );

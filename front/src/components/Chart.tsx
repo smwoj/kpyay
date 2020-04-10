@@ -11,9 +11,12 @@ import {
 import { Point } from "../store/models";
 import * as _ from "underscore";
 import { pickColour } from "../lib/colourPicker";
-import { Button, Dropdown } from "antd";
 import { CustomizedAxisTick } from "./charts/AxisTick";
-import { DeleteButton, RestrictionDropdown } from "./viewConfig/chartButtons";
+import {
+  DeleteButton,
+  GroupByDropdown,
+  SelectDropdown,
+} from "./viewConfig/chartButtons";
 
 export interface ChartProps {
   width: number;
@@ -22,6 +25,7 @@ export interface ChartProps {
   data: Point[];
   deleteChart(selfId: string): void;
   select(selfId: string, restriction: string): void;
+  groupBy(selfId: string, param: string): void;
 }
 
 type ChartData = { [key: string]: number | string }[];
@@ -43,22 +47,22 @@ export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
     return <Line key={hash} type="monotone" dataKey={hash} stroke={colour} />;
   });
 
+  const teamVariants = ["burgery", "wege"];
   const selfDelete = () => props.deleteChart("DUPA-ID");
-
-  const variantsToExecutors: { [option: string]: () => {} } = _.object(
-    ["fr-FR", "en-US"].map((variant) => [
-      variant,
-      () => props.select("moje ID", `lang=${variant}`),
-    ])
-  );
 
   return (
     <div className="chartBox">
       <div>
         <DeleteButton deleteCallback={selfDelete} />
-        <RestrictionDropdown
-          text="restrict lang"
-          variantsToExecutors={variantsToExecutors}
+        <SelectDropdown
+          paramName="team"
+          variants={teamVariants}
+          select={(restriction) => props.select("MOJE MOCKOWE ID", restriction)}
+        />
+        <GroupByDropdown
+          paramName="team"
+          variants={teamVariants}
+          groupBy={(param) => props.groupBy("MOJE MOCKOWE ID", param)}
         />
       </div>
       <div>

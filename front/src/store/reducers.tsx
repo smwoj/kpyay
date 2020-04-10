@@ -1,6 +1,6 @@
 import { Action } from "redux";
 import { AppState } from "./models";
-import { ActionTypes, IDeleteChart, IRestrict } from "./actions";
+import { ActionTypes, IDeleteChart, IGroupBy, IRestrict } from "./actions";
 import * as mock_data from "../mock_data/data";
 
 const MOCK_INIT_STATE = {
@@ -20,15 +20,22 @@ export const rootReducer = (state: AppState, action: Action): AppState => {
 
     case ActionTypes.DELETE_CHART:
       act = action as IDeleteChart;
-      console.log(`TODO: CHART DELETION! ${act.payload.chartId}`);
-      return { ...state };
+      console.log(`HIDING CHART ${act.payload.chartId}`);
+      return { ...state }; // TODO
 
     case ActionTypes.ADD_RESTRICTION:
       act = action as IRestrict;
       console.log(
-        `TODO: RESTRICTING CHART! ${act.payload.chartId} with ${act.payload.restriction}`
+        `RESTRICTING CHART! ${act.payload.chartId} with ${act.payload.restriction}`
       );
-      return { ...state };
+      return { ...state }; // TODO
+
+    case ActionTypes.GROUP_BY:
+      act = action as IGroupBy;
+      console.log(
+        `SPLITTING CHART  ${act.payload.chartId}! Creating new chart for each variant of ${act.payload.param}.`
+      );
+      return { ...state }; // TODO
 
     default:
       return state;

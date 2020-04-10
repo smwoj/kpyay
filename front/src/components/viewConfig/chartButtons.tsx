@@ -3,12 +3,16 @@ import * as React from "react";
 import * as _ from "underscore";
 
 export const DeleteButton = (props: { deleteCallback: () => void }) => (
-  <Button onClick={() => props.deleteCallback()}>delete</Button>
+  <Button onClick={() => props.deleteCallback()}>hide</Button>
 );
 
-export const RestrictionDropdown = (props: {
+/**
+ * Button with dropdown menu.
+ * Clicking a variant executes callback associated in `variantsToExecutors`.
+ */
+export const ExecutablesDropdown = (props: {
   text: string;
-  variantsToExecutors: { [variant: string]: () => {} };
+  variantsToExecutors: { [variant: string]: () => void };
 }): JSX.Element => {
   const menu_items = _.map(props.variantsToExecutors, (executor, variant) => (
     <Menu.Item key={variant}>
@@ -23,5 +27,53 @@ export const RestrictionDropdown = (props: {
         <Button>{props.text}</Button>
       </a>
     </Dropdown>
+  );
+};
+
+/**
+ * ExecutablesDropdown wrapper.
+ * Knows how to dispatch redux action for limiting the number of lines on chart.
+ */
+export const SelectDropdown = (props: {
+  paramName: string;
+  variants: string[];
+  select: (restriction: string) => void;
+}): JSX.Element => {
+  const text = `select ${props.paramName}`;
+  const variantsToExecutors = _.object(
+    props.variants.map((variant) => [
+      variant,
+      () => props.select(`${props.paramName}=${variant}`),
+    ])
+  );
+  return (
+    <ExecutablesDropdown
+      text={text}
+      variantsToExecutors={variantsToExecutors}
+    />
+  );
+};
+
+/**
+ * ExecutablesDropdown wrapper.
+ * Knows how to dispatch redux action for splitting chart.
+ */
+export const GroupByDropdown = (props: {
+  paramName: string;
+  variants: string[];
+  groupBy: (param: string) => void;
+}): JSX.Element => {
+  const text = `group by ${props.paramName}`;
+  const variantsToExecutors = _.object(
+    props.variants.map((variant) => [
+      variant,
+      () => props.groupBy(props.paramName),
+    ])
+  );
+  return (
+    <ExecutablesDropdown
+      text={text}
+      variantsToExecutors={variantsToExecutors}
+    />
   );
 };
