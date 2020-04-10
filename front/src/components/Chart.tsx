@@ -11,38 +11,20 @@ import {
 import { Point } from "../store/models";
 import * as _ from "underscore";
 import { pickColour } from "../lib/colourPicker";
+import { Button, Dropdown } from "antd";
+import { CustomizedAxisTick } from "./charts/AxisTick";
+import { DeleteButton, RestrictionDropdown } from "./viewConfig/chartButtons";
 
 export interface ChartProps {
   width: number;
   height: number;
   name: string;
   data: Point[];
+  deleteChart(selfId: string): void;
+  select(selfId: string, restriction: string): void;
 }
 
-const CustomizedAxisTick = (props: {
-  x: number;
-  y: number;
-  payload: { value: string };
-}) => {
-  const { x, y, payload } = props;
-  return (
-    <g transform={`translate(${x},${y})`}>
-      <text
-        x={0}
-        y={0}
-        dy={16}
-        textAnchor="end"
-        fill="#666"
-        transform="rotate(-45)"
-      >
-        {payload.value}
-      </text>
-    </g>
-  );
-};
-
-type ChartDataPoint = { [key: string]: number | string };
-type ChartData = ChartDataPoint[];
+type ChartData = { [key: string]: number | string }[];
 
 export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
   const pointsByVersion = _.groupBy(props.data, (p) => p._version?.toString()); // one key may be null
@@ -61,17 +43,35 @@ export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
     return <Line key={hash} type="monotone" dataKey={hash} stroke={colour} />;
   });
 
+  const selfDelete = () => props.deleteChart("DUPA-ID");
+
+  const variantsToExecutors: { [option: string]: () => {} } = _.object(
+    ["fr-FR", "en-US"].map((variant) => [
+      variant,
+      () => props.select("moje ID", `lang=${variant}`),
+    ])
+  );
+
   return (
     <div className="chartBox">
-      <LineChart width={props.width} height={props.height} data={data}>
-        <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-        <XAxis dataKey="_version" height={50} tick={CustomizedAxisTick} />
-        <YAxis type="number" domain={[0.5, 1.1]} />
-        <CartesianGrid stroke="#eeeeee" strokeDasharray="5 5" />
-        {lines}
-        <Legend />
-        <Tooltip />
-      </LineChart>
+      <div>
+        <DeleteButton deleteCallback={selfDelete} />
+        <RestrictionDropdown
+          text="restrict lang"
+          variantsToExecutors={variantsToExecutors}
+        />
+      </div>
+      <div>
+        <LineChart width={props.width} height={props.height} data={data}>
+          <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+          <XAxis dataKey="_version" height={50} tick={CustomizedAxisTick} />
+          <YAxis type="number" domain={[0.5, 1.1]} />
+          <CartesianGrid stroke="#eeeeee" strokeDasharray="5 5" />
+          {lines}
+          <Legend />
+          <Tooltip />
+        </LineChart>
+      </div>
     </div>
   );
 };

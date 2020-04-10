@@ -4,6 +4,8 @@ import { configureStore, initStore } from "../store/init";
 import { useWindowSize } from "./hooks";
 import { Chart } from "./Chart";
 import { AppState } from "../store/models";
+import { deleteChartAction, addRestrictionAction } from "../store/actions";
+import "./../styles.css";
 
 const store = configureStore();
 store.dispatch<any>(initStore());
@@ -25,16 +27,20 @@ const App = () => {
           height={chartHeight}
           data={points}
           name={metricId}
+          deleteChart={(chartId) => {
+            store.dispatch(deleteChartAction(chartId));
+          }}
+          select={(chartId, restriction) => {
+            store.dispatch(addRestrictionAction(chartId, restriction));
+          }}
         />
       );
     }
   );
   return (
     <Provider store={store}>
-      <div className="App">
+      <div className="app-div">
         <header className="App-header">
-          <h1>Twoja stara cedzi kaszę xDDD</h1>
-          <br />
           <div>{charts}</div>
         </header>
       </div>
