@@ -1,6 +1,6 @@
 import * as React from "react";
-import {CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis} from "recharts";
-import {Point, Version} from "../store/models";
+import {CartesianGrid, Legend, Line, LineChart, Tooltip, XAxis, YAxis} from "recharts";
+import {Point} from "../store/models";
 import * as _ from "underscore";
 
 
@@ -11,15 +11,6 @@ export interface ChartProps {
     data: Point[],
 }
 
-
-const toLine = (paramsHash: string, mps: Point[]): JSX.Element => {
-    return (
-        <Line type="monotone" key={paramsHash} dataKey="value" stroke="red" data={mps}>
-            {/*<LabelList dataKey="version" position="insideTop"/>*/}
-            {/*<XAxis dataKey={(mp: metricPoint) => mp.timestamp.toISOString()} />*/}
-        </Line>
-    );
-};
 
 
 const CustomizedAxisTick = (props) => {
@@ -47,7 +38,7 @@ export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
 
     const hashes = _.uniq(_.map(props.data, p => p.paramsHash()), false);
     const lines = _.map(hashes, hash => (
-            <Line key={hash} type="monotone" dataKey={(dp: ChartDataPoint)=> dp.values[hash]} stroke="#8884d8"/>
+            <Line key={hash} type="monotone" dataKey={(dp: ChartDataPoint) => dp.values[hash]} stroke="#8884d8"/>
         )
     );
 
@@ -61,11 +52,12 @@ export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
             <XAxis
                 dataKey="version"
                 height={50}
-                tick={<CustomizedAxisTick/>}
+                tick={<CustomizedAxisTick />}
             />
             <YAxis type="number" domain={[0.5, 1.1]}/>
             <CartesianGrid stroke="#eeeeee" strokeDasharray="5 5"/>
             {lines}
+            {/*<Legend/>*/}
             <Tooltip/>
         </LineChart>
     </div>
