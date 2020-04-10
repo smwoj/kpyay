@@ -5,7 +5,7 @@ import * as mock_data from '../mock_data/data'
 
 const MOCK_INIT_STATE = {
     chartsData: {
-        // 'sloths-pastry f-score': mock_data.SLOTHS_VS_PASTRY_FSCORES,
+        'sloths-pastry f-score': mock_data.SLOTHS_VS_PASTRY_FSCORES,
         'dogs-muffins f-score': mock_data.DOGS_VS_MUFFINS_FSCORES,
     }
 };
