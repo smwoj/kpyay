@@ -4,4 +4,10 @@
 server/project/**
 server/target/**
 
+**/.ipynb_checkpoints/**
+**/venv/**
+**/__pycache__/**
+
+**/dist/**
+**/built/**
 **/node_modules/**
