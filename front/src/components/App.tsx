@@ -2,7 +2,7 @@ import * as React from "react";
 import { Provider } from "react-redux";
 import { configureStore, initStore } from "../store/init";
 import { useWindowSize } from "./hooks";
-import { Chart } from "./Chart";
+import { Chart } from "./charts/Chart";
 import { AppState } from "../store/models";
 import {
   deleteChartAction,

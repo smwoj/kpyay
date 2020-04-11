@@ -63,7 +63,7 @@ export const GroupByDropdown = (props: {
   variants: string[];
   groupBy: (param: string) => void;
 }): JSX.Element => {
-  const text = `group by ${props.paramName}`;
+  const text = `group by ${props.paramName}`; // rename to split by
   const variantsToExecutors = _.object(
     props.variants.map((variant) => [
       variant,
