@@ -18,8 +18,10 @@
     "url": "https://github.com/smwoj/kp-ayy"
   },
   "dependencies": {
+    "@types/lodash": "^4.14.149",
     "@types/recharts": "^1.8.9",
     "antd": "^3.26.13",
+    "lodash": "^4.17.15",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-redux": "^7.2.0",
