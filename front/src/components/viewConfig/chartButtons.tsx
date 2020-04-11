@@ -58,16 +58,16 @@ export const SelectDropdown = (props: {
  * ExecutablesDropdown wrapper.
  * Knows how to dispatch redux action for splitting chart.
  */
-export const GroupByDropdown = (props: {
+export const SplitByDropdown = (props: {
   paramName: string;
   variants: string[];
-  groupBy: (param: string) => void;
+  splitBy: (param: string) => void;
 }): JSX.Element => {
-  const text = `group by ${props.paramName}`; // rename to split by
+  const text = `split by ${props.paramName}`; // rename to split by
   const variantsToExecutors = _.object(
     props.variants.map((variant) => [
       variant,
-      () => props.groupBy(props.paramName),
+      () => props.splitBy(props.paramName),
     ])
   );
   return (

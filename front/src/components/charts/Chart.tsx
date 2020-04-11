@@ -13,7 +13,7 @@ import { pickColour } from "../../lib/colourPicker";
 import { CustomizedAxisTick } from "./AxisTick";
 import {
   DeleteButton,
-  GroupByDropdown,
+  SplitByDropdown,
   SelectDropdown,
 } from "../viewConfig/chartButtons";
 import { ChartData } from "./calculate";
@@ -24,7 +24,7 @@ export interface ChartProps {
   data: ChartData;
   deleteChart(selfId: string): void;
   select(selfId: string, restriction: string): void;
-  groupBy(selfId: string, param: string): void;
+  splitBy(selfId: string, param: string): void;
 }
 
 const Title = (props: {
@@ -46,16 +46,6 @@ const Title = (props: {
 };
 
 export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
-  // TODO: hashes shouldn'y include withOne params.
-  const lines = _.map(props.data.hashes, (hash, index) => {
-    const colour = pickColour(index);
-    return <Line key={hash} type="monotone" dataKey={hash} stroke={colour} />;
-  });
-
-  console.log(props.data.noChoiceParams, props.data.paramsToVariants);
-  // const teamVariants = ["burgery", "wege"];
-  const selfDelete = () => props.deleteChart("DUPA-ID");
-
   const selectDropdowns = Object.entries(
     props.data.paramsToVariants
   ).map(([param, variants]) => (
@@ -66,16 +56,22 @@ export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
       select={(restriction) => props.select("MOJE MOCKOWE ID", restriction)}
     />
   ));
-  const groupByDropdowns = Object.entries(
+  const splitByDropdowns = Object.entries(
     props.data.paramsToVariants
   ).map(([param, variants]) => (
-    <GroupByDropdown
+    <SplitByDropdown
       key={param}
       paramName={param}
       variants={variants}
-      groupBy={(param) => props.groupBy("MOJE MOCKOWE ID", param)}
+      splitBy={(param) => props.splitBy("MOJE MOCKOWE ID", param)}
     />
   ));
+
+  // TODO: hashes shouldn'y include withOne params.
+  const lines = _.map(props.data.hashes, (hash, index) => {
+    const colour = pickColour(index);
+    return <Line key={hash} type="monotone" dataKey={hash} stroke={colour} />;
+  });
 
   return (
     <div className="chartBox">
@@ -86,9 +82,9 @@ export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
         />
       </div>
       <div id="config-buttons-div">
-        <DeleteButton deleteCallback={selfDelete} />
+        <DeleteButton deleteCallback={() => props.deleteChart("DUPA-ID")} />
         {selectDropdowns}
-        {groupByDropdowns}
+        {splitByDropdowns}
       </div>
       <div>
         <LineChart

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Provider } from "react-redux";
+import { connect, Provider } from "react-redux";
 import { configureStore, initStore } from "../store/init";
 import { useWindowSize } from "./hooks";
 import { Chart } from "./charts/Chart";
@@ -7,10 +7,12 @@ import { AppState } from "../store/models";
 import {
   deleteChartAction,
   addRestrictionAction,
-  groupByAction,
+  splitByAction,
+  fetchMetricAction,
 } from "../store/actions";
 import { calculate } from "./charts/calculate";
 import "./../styles.css";
+import { Input } from "antd";
 
 const store = configureStore();
 store.dispatch<any>(initStore());
@@ -42,8 +44,8 @@ const App = () => {
           select={(chartId, restriction) => {
             store.dispatch(addRestrictionAction(chartId, restriction));
           }}
-          groupBy={(chartId, param) => {
-            store.dispatch(groupByAction(chartId, param));
+          splitBy={(chartId, param) => {
+            store.dispatch(splitByAction(chartId, param));
           }}
         />
       );
@@ -53,6 +55,16 @@ const App = () => {
     <Provider store={store}>
       <div className="app-div">
         <header className="App-header">
+          <div className="example-input">
+            <Input
+              size="default"
+              placeholder="metricId"
+              onPressEnter={(e) => {
+                console.log("kurla", e.currentTarget.value);
+                fetchMetricAction(e.currentTarget.value);
+              }}
+            />
+          </div>
           <div>{charts}</div>
         </header>
       </div>
@@ -60,4 +72,11 @@ const App = () => {
   );
 };
 
+// function mapStateToProps(state: AppState, ownProps) {
+//   return {
+//     chartsData: state.chartsData,
+//   };
+// }
+//
+// export default connect(mapStateToProps)(App);
 export default App;
