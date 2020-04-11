@@ -9,6 +9,7 @@ import {
   addRestrictionAction,
   groupByAction,
 } from "../store/actions";
+import { calculate } from "./charts/calculate";
 import "./../styles.css";
 
 const store = configureStore();
@@ -24,13 +25,17 @@ const App = () => {
 
   const charts: JSX.Element[] = Object.entries(state.chartsData).map(
     ([metricId, points]) => {
+      const data = calculate(points, {
+        metricId,
+        filters: [],
+        xAccessor: "version",
+      });
       return (
         <Chart
           key={metricId}
           width={chartWidth}
           height={chartHeight}
-          data={points}
-          name={metricId}
+          data={data}
           deleteChart={(chartId) => {
             store.dispatch(deleteChartAction(chartId));
           }}
