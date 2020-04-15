@@ -7,13 +7,18 @@ import {
   IRestrict,
   IFetchMetric,
 } from "./actions";
+import * as mock_data from "../mock_data/data";
 
 const INIT_STATE = {
-  chartsData: {},
+  chartsData: {
+    // "dogs-muffins f-score": mock_data.DOGS_VS_MUFFINS_FSCORES,
+    alfa: mock_data.DOGS_VS_MUFFINS_FSCORES,
+  },
 };
 
 export const rootReducer = (state: AppState, action: Action): AppState => {
   let act;
+  console.log("Reducer odpalony", action);
 
   switch (action.type) {
     case ActionTypes.INIT_STORE:
@@ -44,7 +49,9 @@ export const rootReducer = (state: AppState, action: Action): AppState => {
       console.log(
         `FETCHED METRIC ${act.payload.metricId}! Adding it's point's to state.`
       );
+      // TODO handluj errorami fetchowania
       let updatedState = { ...state };
+      updatedState.chartsData = { ...updatedState.chartsData }; // avoid shallow copies interfering with re-rendering
       updatedState.chartsData[act.payload.metricId] = act.payload.points;
       return updatedState;
 

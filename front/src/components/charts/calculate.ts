@@ -71,7 +71,7 @@ export const calculate = (points: Point[], config: ChartConfig): ChartData => {
   let hashes: Set<string> = new Set();
   let variants = new DefaultDict<Set<string>>(() => new Set<string>());
 
-  for (let p of points) {
+  points.forEach((p) => {
     if (group(p)) {
       groups.get(group(p) as string).push(p);
     }
@@ -79,7 +79,7 @@ export const calculate = (points: Point[], config: ChartConfig): ChartData => {
     _.forEach(p._params, (value, param) => {
       variants.get(param).add(value);
     });
-  }
+  });
   const [noChoiceParams, paramsToVariants] = partitionByVariants(variants.data);
 
   return {

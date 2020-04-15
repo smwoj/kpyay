@@ -65,6 +65,9 @@ export const splitByAction = (chartId: string, param: string): ISplitBy => {
 
 const MOCK_DATA: { [metricId: string]: Point[] } = {
   "sloths-pastry f-score": mock_data.SLOTHS_VS_PASTRY_FSCORES,
+  beta: mock_data.DOGS_VS_MUFFINS_FSCORES,
+  gamma: mock_data.SLOTHS_VS_PASTRY_FSCORES,
+  delta: mock_data.SLOTHS_VS_PASTRY_FSCORES,
   "dogs-muffins f-score": mock_data.DOGS_VS_MUFFINS_FSCORES,
 };
 
@@ -72,9 +75,8 @@ export const fetchMetricAction = (metricId: string): IFetchMetric => {
   const points = MOCK_DATA[metricId];
   if (points === undefined) {
     console.log("bad stuff happened, can't fetch data for " + metricId);
-    // return {type: ActionTypes.FETCH_ERROR, payload: {send: help}} // TODO
+    throw `no such metric: ${metricId} || weź to obsłuż jak człowiek`;
   }
-  console.log("zwracam punkty, ale redux jest źle wpięty :_:", metricId);
   return {
     type: ActionTypes.FETCH_DATA,
     payload: { metricId, points },

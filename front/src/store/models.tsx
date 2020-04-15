@@ -91,7 +91,7 @@ export class Point {
     if (left._version && right._version) {
       return Version.ordAsc(left._version, right._version);
     } else {
-      throw `cannot cmp points; at least one does not have version. left: ${left}, right: ${right}`;
+      throw `cannot cmp points; at least one does not have a version. left: ${left}, right: ${right}`;
     }
   }
 
