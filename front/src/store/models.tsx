@@ -103,4 +103,5 @@ export class Point {
 
 export interface AppState {
   chartsData: { [metricId: string]: Point[] };
+  last_message: string;
 }

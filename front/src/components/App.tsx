@@ -65,7 +65,7 @@ async function getMetricData(metricId: string): Promise<Point[]> {
 // };
 
 const Spa = (
-  props: { chartsData: { [metricId: string]: Point[] } } & {
+  props: AppState & {
     dispatch: any;
     match: any;
   }
@@ -104,8 +104,8 @@ const Spa = (
   return (
     <div className="app-div">
       <header className="App-header">
-        <h1>{"slug: " + props.match.url}</h1>
-        <p>"szczępienie ryjca (a tak srsly notyfikacja o brzydkich eventach"</p>
+        {/*<h1>{"slug: " + props.match.url}</h1>*/}
+        <p>{props.last_message}</p>
         <div className="example-input">
           <Input
             size="default"
@@ -120,7 +120,9 @@ const Spa = (
                 },
                 (err) => {
                   console.log("NO BUENO:", err);
-                  props.dispatch(failedToFetchPointsAction(metricId, err));
+                  props.dispatch(
+                    failedToFetchPointsAction(metricId, err.toString())
+                  );
                 }
               );
             }}
@@ -133,7 +135,7 @@ const Spa = (
 };
 
 function mapStateToProps(state: AppState) {
-  return { chartsData: state.chartsData };
+  return { chartsData: state.chartsData, last_message: state.last_message };
 }
 const App = connect(mapStateToProps)(Spa);
 

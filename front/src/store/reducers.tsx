@@ -15,6 +15,7 @@ const INIT_STATE = {
     // "dogs-muffins f-score": mock_data.DOGS_VS_MUFFINS_FSCORES,
     alfa: mock_data.DOGS_VS_MUFFINS_FSCORES,
   },
+  last_message: "", // todo: make it expire
 };
 
 export const rootReducer = (state: AppState, action: Action): AppState => {
@@ -62,8 +63,7 @@ export const rootReducer = (state: AppState, action: Action): AppState => {
       console.log(
         `FAILED TO FETCH POINTS FOR ${act.payload.metricId}!!! msg: ${act.payload.msg}`
       );
-      // todo: ustaw w stejcie msg do wyświetlania
-      return state;
+      return { ...state, last_message: act.payload.msg };
 
     default:
       return state;
