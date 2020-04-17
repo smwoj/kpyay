@@ -9,3 +9,5 @@ edition = "2018"
 [dependencies]
 actix-web ="2.*"
 actix-rt = "1.0.0"
+actix-cors = "*"
+serde_json = "*"
