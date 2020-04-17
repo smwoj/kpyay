@@ -5,7 +5,8 @@ import {
   IDeleteChart,
   ISplitBy,
   IRestrict,
-  IFetchMetric,
+  IFetchedPoints,
+  IFailedToFetchPoints,
 } from "./actions";
 import * as mock_data from "../mock_data/data";
 
@@ -44,16 +45,25 @@ export const rootReducer = (state: AppState, action: Action): AppState => {
       );
       return { ...state }; // TODO
 
-    case ActionTypes.FETCH_DATA:
-      act = action as IFetchMetric;
+    case ActionTypes.FETCHED_POINTS:
+      act = action as IFetchedPoints;
       console.log(
         `FETCHED METRIC ${act.payload.metricId}! Adding it's point's to state.`
       );
-      // TODO handluj errorami fetchowania
       let updatedState = { ...state };
-      updatedState.chartsData = { ...updatedState.chartsData }; // avoid shallow copies interfering with re-rendering
+      updatedState.chartsData = { ...updatedState.chartsData };
+      //  ^^^ avoid shallow copies interfering with re-rendering
+      // TODO: sprawdź czy to serio problem i dlaczego
       updatedState.chartsData[act.payload.metricId] = act.payload.points;
       return updatedState;
+
+    case ActionTypes.FAILED_TO_FETCH_POINTS:
+      act = action as IFailedToFetchPoints;
+      console.log(
+        `FAILED TO FETCH POINTS FOR ${act.payload.metricId}!!! msg: ${act.payload.msg}`
+      );
+      // todo: ustaw w stejcie msg do wyświetlania
+      return state;
 
     default:
       return state;

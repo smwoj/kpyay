@@ -1,13 +1,13 @@
 import { Action } from "redux";
 import { Point } from "./models";
-import * as mock_data from "../mock_data/data";
 
 export const ActionTypes = {
   INIT_STORE: "INIT_STORE",
   DELETE_CHART: "DELETE_CHART",
   ADD_RESTRICTION: "ADD_RESTRICTION",
   SPLIT_BY: "SPLIT_BY",
-  FETCH_DATA: "FETCH_DATA",
+  FETCHED_POINTS: "FETCHED_POINTS",
+  FAILED_TO_FETCH_POINTS: "FAILED_TO_FETCH_POINTS",
 };
 
 export interface IInitStoreAction extends Action {}
@@ -31,10 +31,16 @@ export interface ISplitBy extends Action {
   };
 }
 
-export interface IFetchMetric extends Action {
+export interface IFetchedPoints extends Action {
   payload: {
     metricId: string;
     points: Point[];
+  };
+}
+export interface IFailedToFetchPoints extends Action {
+  payload: {
+    metricId: string;
+    msg: string;
   };
 }
 
@@ -63,22 +69,22 @@ export const splitByAction = (chartId: string, param: string): ISplitBy => {
   };
 };
 
-const MOCK_DATA: { [metricId: string]: Point[] } = {
-  "sloths-pastry f-score": mock_data.SLOTHS_VS_PASTRY_FSCORES,
-  beta: mock_data.DOGS_VS_MUFFINS_FSCORES,
-  gamma: mock_data.SLOTHS_VS_PASTRY_FSCORES,
-  delta: mock_data.SLOTHS_VS_PASTRY_FSCORES,
-  "dogs-muffins f-score": mock_data.DOGS_VS_MUFFINS_FSCORES,
+export const fetchedPointsAction = (
+  metricId: string,
+  points: Point[]
+): IFetchedPoints => {
+  return {
+    type: ActionTypes.FETCHED_POINTS,
+    payload: { metricId, points },
+  };
 };
 
-export const fetchMetricAction = (metricId: string): IFetchMetric => {
-  const points = MOCK_DATA[metricId];
-  if (points === undefined) {
-    console.log("bad stuff happened, can't fetch data for " + metricId);
-    throw `no such metric: ${metricId} || weź to obsłuż jak człowiek`;
-  }
+export const failedToFetchPointsAction = (
+  metricId: string,
+  msg: string
+): IFailedToFetchPoints => {
   return {
-    type: ActionTypes.FETCH_DATA,
-    payload: { metricId, points },
+    type: ActionTypes.FAILED_TO_FETCH_POINTS,
+    payload: { metricId, msg },
   };
 };
