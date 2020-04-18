@@ -3,7 +3,7 @@ import { connect, Provider } from "react-redux";
 import { configureStore, initStore } from "../store/init";
 import { useWindowSize } from "./hooks";
 import { Chart } from "./charts/Chart";
-import { AppState } from "../store/models";
+import { AppState, paramsHash, Point, Restrictions } from "../store/models";
 import {
   addRestrictionAction,
   deleteChartAction,
@@ -14,6 +14,46 @@ import "./../styles.css";
 import { HashRouter, Route, Switch } from "react-router-dom";
 import { RouteConfig } from "react-router-config";
 import MetricIdInput from "./MetricIdInput";
+import { Action } from "redux";
+import * as _ from "lodash";
+
+const configsToCharts = (
+  cache: { [metricId: string]: Point[] },
+  restrictionsArr: Restrictions[],
+  metricId: string,
+  chartWidth: number,
+  chartHeight: number,
+  dispatch: (a: Action) => void
+): JSX.Element[] => {
+  console.log(restrictionsArr);
+  return restrictionsArr.map((restrictions) => {
+    const ioOk = (p: Point): boolean => {
+      return _.entries(restrictions).every(([param, value]) => {
+        return p._params[param] == value;
+      });
+    };
+    const points = cache[metricId].filter((p) => ioOk(p));
+    const data = calculate(points, "version"); // TODO POPRAW ŻEBY W KONFIGU
+    return (
+      <Chart
+        key={`${metricId}::${paramsHash(restrictions)}`}
+        metricId={metricId}
+        width={chartWidth}
+        height={chartHeight}
+        data={data}
+        deleteChart={(chartId) => {
+          dispatch(deleteChartAction(chartId));
+        }}
+        select={(chartId, restriction) => {
+          dispatch(addRestrictionAction(chartId, restriction));
+        }}
+        splitBy={(chartId, param) => {
+          dispatch(splitByAction(chartId, param));
+        }}
+      />
+    );
+  });
+};
 
 const Spa = (
   props: AppState & {
@@ -21,37 +61,25 @@ const Spa = (
     match: any;
   }
 ) => {
-  console.log(Object.keys(props.chartsData));
   const [width, height] = useWindowSize();
   const chartWidth = width >= 600 ? 600 : width;
   const chartHeight = height >= 300 ? 300 : height;
-
-  const charts: JSX.Element[] = Object.entries(props.chartsData).map(
-    ([metricId, points]) => {
-      const data = calculate(points, {
+  console.log(props.configs);
+  const charts = _.flatMap(
+    _.entries(props.configs),
+    ([metricId, restrictionsArray]) => {
+      // console.log("it flatMap", metricId, restrictionsArray);
+      return configsToCharts(
+        props.cache,
+        restrictionsArray,
         metricId,
-        filters: [],
-        xAccessor: "version",
-      });
-      return (
-        <Chart
-          key={metricId}
-          width={chartWidth}
-          height={chartHeight}
-          data={data}
-          deleteChart={(chartId) => {
-            props.dispatch(deleteChartAction(chartId));
-          }}
-          select={(chartId, restriction) => {
-            props.dispatch(addRestrictionAction(chartId, restriction));
-          }}
-          splitBy={(chartId, param) => {
-            props.dispatch(splitByAction(chartId, param));
-          }}
-        />
+        chartWidth,
+        chartHeight,
+        props.dispatch
       );
     }
   );
+
   return (
     <div className="app-div">
       <header className="App-header">
@@ -66,8 +94,12 @@ const Spa = (
   );
 };
 
-function mapStateToProps(state: AppState) {
-  return { chartsData: state.chartsData, last_message: state.last_message };
+function mapStateToProps(state: AppState): AppState {
+  return {
+    cache: state.cache,
+    configs: state.configs,
+    last_message: state.last_message,
+  };
 }
 const App = connect(mapStateToProps)(Spa);
 

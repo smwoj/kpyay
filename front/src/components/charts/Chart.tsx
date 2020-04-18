@@ -22,6 +22,8 @@ export interface ChartProps {
   width: number;
   height: number;
   data: ChartData;
+  metricId: string;
+  // TODO: zbinduj po ludzku przez connect
   deleteChart(selfId: string): void;
   select(selfId: string, restriction: string): void;
   splitBy(selfId: string, param: string): void;
@@ -34,7 +36,7 @@ const Title = (props: {
   let title_descr: string;
   if (Object.entries(props.noChoiceParams).length) {
     title_descr =
-      "(" +
+      " (" +
       Object.entries(props.noChoiceParams)
         .map(([param, value]) => `${param}=${value}`)
         .join(", ") +
@@ -67,7 +69,6 @@ export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
     />
   ));
 
-  // TODO: hashes shouldn'y include withOne params.
   const lines = _.map(props.data.hashes, (hash, index) => {
     const colour = pickColour(index);
     return <Line key={hash} type="monotone" dataKey={hash} stroke={colour} />;
@@ -77,7 +78,7 @@ export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
     <div className="chartBox">
       <div className="chart-title-div">
         <Title
-          metricId={props.data.config.metricId}
+          metricId={props.metricId}
           noChoiceParams={props.data.noChoiceParams}
         />
       </div>

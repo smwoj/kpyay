@@ -1,3 +1,9 @@
+import * as _ from "lodash";
+//
+// function dedup<T>(ts: T[]): T[] {
+//   return _.uniqWith(ts, _.isEqual);
+// }
+
 export interface RawPoint {
   value: number;
   version: string | null;
@@ -45,6 +51,13 @@ export class Version {
   }
 }
 
+export const paramsHash = (params: { [param: string]: string }): string => {
+  return Object.keys(params)
+    .sort()
+    .map((key) => `${key}=${params[key]}`)
+    .join(", ");
+};
+
 export class Point {
   readonly _value: number;
   readonly _version: Version | null;
@@ -81,10 +94,7 @@ export class Point {
   }
 
   paramsHash(): string {
-    return Object.keys(this._params)
-      .sort()
-      .map((key) => `${key}=${this._params[key]}`)
-      .join(", ");
+    return paramsHash(this._params);
   }
 
   static ascVersion(left: Point, right: Point): number {
@@ -101,7 +111,29 @@ export class Point {
   }
 }
 
+// export class ChartRestrictions {
+//   readonly restrictions: { [param: string]: string };
+//
+//   static parse(str: string): ChartRestrictions {
+//     const entries = str.split(",").map((pair) => [...pair.split("=")]);
+//     return new this(Object.fromEntries(entries));
+//   }
+//
+//   constructor(restrictions: { [param: string]: string }) {
+//     this.restrictions = restrictions;
+//   }
+//
+//   hash(): string {
+//     return Object.entries(this.restrictions)
+//       .map(([param, value]) => `${param}=${value}`)
+//       .sort()
+//       .join(", ");
+//   }
+// }
+export type Restrictions = { [param: string]: string };
+
 export interface AppState {
-  chartsData: { [metricId: string]: Point[] };
+  cache: { [metricId: string]: Point[] };
+  configs: { [metricId: string]: Restrictions[] };
   last_message: string;
 }

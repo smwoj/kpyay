@@ -10,10 +10,15 @@ import {
 } from "./actions";
 import * as mock_data from "../mock_data/data";
 
-const INIT_STATE = {
-  chartsData: {
+const INIT_STATE: AppState = {
+  cache: {
     // "dogs-muffins f-score": mock_data.DOGS_VS_MUFFINS_FSCORES,
     alfa: mock_data.DOGS_VS_MUFFINS_FSCORES,
+    beta: mock_data.SLOTHS_VS_PASTRY_FSCORES,
+  },
+  configs: {
+    alfa: [{}, { team: "red" }, { team: "green" }],
+    beta: [{ team: "echo" }, { classifier: "cnn-eta" }],
   },
   last_message: "", // todo: make it expire
 };
@@ -47,15 +52,17 @@ export const rootReducer = (state: AppState, action: Action): AppState => {
       return { ...state }; // TODO
 
     case ActionTypes.FETCHED_POINTS:
+      // todo nie feczuj jak już jest
       act = action as IFetchedPoints;
       console.log(
         `FETCHED METRIC ${act.payload.metricId}! Adding it's point's to state.`
       );
       let updatedState = { ...state };
-      updatedState.chartsData = { ...updatedState.chartsData };
+      updatedState.cache = { ...updatedState.cache };
       //  ^^^ avoid shallow copies interfering with re-rendering
       // TODO: sprawdź czy to serio problem i dlaczego
-      updatedState.chartsData[act.payload.metricId] = act.payload.points;
+      updatedState.cache[act.payload.metricId] = act.payload.points;
+      // dodać config łajzo todo
       return updatedState;
 
     case ActionTypes.FAILED_TO_FETCH_POINTS:
