@@ -73,7 +73,7 @@ export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
     const colour = pickColour(index);
     return <Line key={hash} type="monotone" dataKey={hash} stroke={colour} />;
   });
-
+  const legend = lines.length > 1 ? <Legend /> : null;
   return (
     <div className="chartBox">
       <div className="chart-title-div">
@@ -99,7 +99,7 @@ export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
           {/*TODO: ^^ calculate in calculate*/}
           <CartesianGrid stroke="#eeeeee" strokeDasharray="5 5" />
           {lines}
-          <Legend />
+          {legend}
           <Tooltip />
         </LineChart>
       </div>

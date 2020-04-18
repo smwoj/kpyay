@@ -1,4 +1,4 @@
-import { DefaultDict } from "../components/charts/calculate";
+import { DefaultDict } from "../lib/collections";
 
 describe("DefaultDict", () => {
   it("does its thing for arrays", () => {
@@ -35,5 +35,25 @@ describe("DefaultDict", () => {
       a: new Set(["alfa", "alpaka"]),
       b: new Set(["beta"]),
     });
+  });
+
+  it("spreads like butter", () => {
+    const dd = new DefaultDict<string[]>(() => []);
+    const pairs: [string, string][] = [
+      ["a", "alfa"],
+      ["b", "beta"],
+      ["a", "alpaka"],
+    ];
+    for (let pair of pairs) {
+      const [k, v] = pair;
+      dd.get(k).push(v);
+    }
+
+    const spread = [...dd];
+
+    expect(spread).toEqual([
+      ["a", ["alfa", "alpaka"]],
+      ["b", ["beta"]],
+    ]);
   });
 });

@@ -1,12 +1,7 @@
-import { Point, paramsHash } from "../../store/models";
+import { paramsHash, Point } from "../../store/models";
 import * as __ from "lodash";
 import * as _ from "underscore";
-
-// export interface ChartConfig {
-//   readonly metricId: string;
-//   readonly filters: { [param: string]: string };
-//   readonly xAccessor: "version" | "timestamp";
-// }
+import { DefaultDict } from "../../lib/collections";
 
 type NoChoiceParams = { [param: string]: string };
 type ParamVariants = { [param: string]: string[] };
@@ -17,23 +12,6 @@ export interface ChartData {
   readonly hashes: string[];
   readonly noChoiceParams: NoChoiceParams;
   readonly paramsToVariants: ParamVariants;
-}
-
-export class DefaultDict<T> {
-  data: { [keys: string]: T };
-  init: () => T;
-
-  constructor(defaultInit: () => T) {
-    this.data = {};
-    this.init = defaultInit;
-  }
-
-  get(key: string): T {
-    if (!(key in this.data)) {
-      this.data[key] = this.init();
-    }
-    return this.data[key];
-  }
 }
 
 export const partitionByVariants = (paramsToVariants: {
@@ -61,7 +39,7 @@ export const partitionByVariants = (paramsToVariants: {
   );
   return [noChoice, variants];
 };
-// todo: gdzieś wcześniej ściągnąć punkty z cache i przefiltrować
+
 export const calculate = (
   points: Point[],
   xAccessor: "version" | "timestamp"

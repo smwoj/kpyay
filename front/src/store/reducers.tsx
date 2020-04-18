@@ -62,7 +62,6 @@ export const rootReducer = (state: AppState, action: Action): AppState => {
       //  ^^^ avoid shallow copies interfering with re-rendering
       // TODO: sprawdź czy to serio problem i dlaczego
       updatedState.cache[act.payload.metricId] = act.payload.points;
-      // dodać config łajzo todo
       return updatedState;
 
     case ActionTypes.FAILED_TO_FETCH_POINTS:

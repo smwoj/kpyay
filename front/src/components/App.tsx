@@ -64,11 +64,11 @@ const Spa = (
   const [width, height] = useWindowSize();
   const chartWidth = width >= 600 ? 600 : width;
   const chartHeight = height >= 300 ? 300 : height;
+
   console.log(props.configs);
   const charts = _.flatMap(
     _.entries(props.configs),
     ([metricId, restrictionsArray]) => {
-      // console.log("it flatMap", metricId, restrictionsArray);
       return configsToCharts(
         props.cache,
         restrictionsArray,
