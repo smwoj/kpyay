@@ -4,17 +4,11 @@ import { configureStore, initStore } from "../store/init";
 import { useWindowSize } from "./hooks";
 import { Chart } from "./charts/Chart";
 import { AppState, Restrictions } from "../store/models";
-import {
-  restrictAction,
-  deleteChartAction,
-  splitByAction,
-} from "../store/actions";
 import { calculate } from "./charts/calculate";
 import "./../styles.css";
 import { HashRouter, Route, Switch } from "react-router-dom";
 import { RouteConfig } from "react-router-config";
 import MetricIdInput from "./MetricIdInput";
-import { Action } from "redux";
 import * as _ from "lodash";
 import { paramsHash, Point } from "../models/Point";
 

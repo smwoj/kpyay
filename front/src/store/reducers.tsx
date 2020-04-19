@@ -1,4 +1,4 @@
-import { Action } from "redux";
+import { Action, Reducer } from "redux";
 import { AppState, Restrictions } from "./models";
 import {
   ActionTypes,
@@ -36,81 +36,96 @@ const INIT_STATE: AppState = {
   last_message: "", // todo: make it expire
 };
 
-// todo: podziel i zrób mapę
+const reduceInit = (state: AppState, action: Action): AppState => {
+  console.log("!!! Using empty initial state. !!!");
+  return INIT_STATE;
+};
+
+const reduceDeleteChart = (state: AppState, action: IDeleteChart): AppState => {
+  console.log(
+    `DELETING CHART ${
+      action.payload.metricId
+    } with restrictions ${JSON.stringify(action.payload.restrictions)}`
+  );
+  const newConfigs = state.configs.clone();
+  newConfigs.get(action.payload.metricId).remove(action.payload.restrictions);
+  return { ...state, configs: newConfigs };
+};
+
+const reduceAddRestriction = (state: AppState, action: IRestrict): AppState => {
+  console.log(
+    `RESTRICTING CHART! ${action.payload.metricId} with ${action.payload.restrictedParam}=${action.payload.restrictedToValue}`
+  );
+  const newConfigs = state.configs.clone();
+  const restrictionsSet = newConfigs.get(action.payload.metricId);
+  restrictionsSet.remove(action.payload.restrictions);
+  const newRestrictions = { ...action.payload.restrictions };
+  newRestrictions[action.payload.restrictedParam] =
+    action.payload.restrictedToValue;
+  restrictionsSet.add(newRestrictions);
+  return { ...state, configs: newConfigs };
+};
+const reduceSplitBy = (state: AppState, action: ISplitBy): AppState => {
+  console.log(
+    `SPLITTING CHART  ${action.payload.metricId}! Creating new chart for each variant of ${action.payload.param}.`
+  );
+  const newConfigs = state.configs.clone();
+  const restrictions = newConfigs.get(action.payload.metricId);
+  restrictions.remove(action.payload.restrictions);
+  action.payload.variants.forEach((variant) => {
+    const newRestrictions = { ...action.payload.restrictions };
+    newRestrictions[action.payload.param] = variant;
+    restrictions.add(newRestrictions);
+  });
+
+  return { ...state, configs: newConfigs };
+};
+const reduceFetchedPoints = (
+  state: AppState,
+  action: IFetchedPoints
+): AppState => {
+  // todo nie feczuj jak już jest
+  console.log(
+    `FETCHED METRIC ${action.payload.metricId}! Adding it's point's to state.`
+  );
+  const updatedState = { ...state };
+  updatedState.cache = { ...updatedState.cache };
+  //  ^^^ avoid shallow copies interfering with re-rendering
+  // TODO: sprawdź czy to serio problem i dlaczego
+  updatedState.cache[action.payload.metricId] = action.payload.points;
+  updatedState.configs.get(action.payload.metricId).add({});
+  // ^ no restrictions, so all lines will be rendered
+  return updatedState;
+};
+
+const reduceFailedToFetchPoints = (
+  state: AppState,
+  action: IFailedToFetchPoints
+): AppState => {
+  console.log(
+    `FAILED TO FETCH POINTS FOR ${action.payload.metricId}!!! msg: ${action.payload.msg}`
+  );
+  return { ...state, last_message: action.payload.msg };
+};
+
+const reducers = (() => {
+  const reducers: { [actionType: string]: Reducer } = {};
+  reducers[ActionTypes.INIT_STORE] = reduceInit;
+  reducers[ActionTypes.DELETE_CHART] = reduceDeleteChart;
+  reducers[ActionTypes.ADD_RESTRICTION] = reduceAddRestriction;
+  reducers[ActionTypes.SPLIT_BY] = reduceSplitBy;
+  reducers[ActionTypes.FETCHED_POINTS] = reduceFetchedPoints;
+  reducers[ActionTypes.FAILED_TO_FETCH_POINTS] = reduceFailedToFetchPoints;
+  return reducers;
+})();
+
 export const rootReducer = (state: AppState, action: Action): AppState => {
-  let act;
-  let newConfigs;
-  console.log("Reducer odpalony", action);
-
-  switch (action.type) {
-    case ActionTypes.INIT_STORE:
-      console.log("!!! Using empty initial state. !!!");
-      return INIT_STATE;
-
-    case ActionTypes.DELETE_CHART:
-      act = action as IDeleteChart;
-      console.log(
-        `DELETING CHART ${
-          act.payload.metricId
-        } with restrictions ${JSON.stringify(act.payload.restrictions)}`
-      );
-      newConfigs = state.configs.clone();
-      newConfigs.get(act.payload.metricId).remove(act.payload.restrictions);
-      return { ...state, configs: newConfigs };
-
-    case ActionTypes.ADD_RESTRICTION:
-      act = action as IRestrict;
-      console.log(
-        `RESTRICTING CHART! ${act.payload.metricId} with ${act.payload.restrictedParam}=${act.payload.restrictedToValue}`
-      );
-      newConfigs = state.configs.clone();
-      const restrictionsSet = newConfigs.get(act.payload.metricId);
-      restrictionsSet.remove(act.payload.restrictions);
-      const newRestrictions = { ...act.payload.restrictions };
-      newRestrictions[act.payload.restrictedParam] =
-        act.payload.restrictedToValue;
-      restrictionsSet.add(newRestrictions);
-      return { ...state, configs: newConfigs };
-
-    case ActionTypes.SPLIT_BY:
-      act = action as ISplitBy;
-      console.log(
-        `SPLITTING CHART  ${act.payload.metricId}! Creating new chart for each variant of ${act.payload.param}.`
-      );
-      newConfigs = state.configs.clone();
-      const restrictions = newConfigs.get(act.payload.metricId);
-      restrictions.remove(act.payload.restrictions);
-      act.payload.variants.forEach((variant) => {
-        const newRestrictions = { ...act.payload.restrictions };
-        newRestrictions[act.payload.param] = variant;
-        restrictions.add(newRestrictions);
-      });
-
-      return { ...state, configs: newConfigs };
-
-    case ActionTypes.FETCHED_POINTS:
-      // todo nie feczuj jak już jest
-      act = action as IFetchedPoints;
-      console.log(
-        `FETCHED METRIC ${act.payload.metricId}! Adding it's point's to state.`
-      );
-      const updatedState = { ...state };
-      updatedState.cache = { ...updatedState.cache };
-      //  ^^^ avoid shallow copies interfering with re-rendering
-      // TODO: sprawdź czy to serio problem i dlaczego
-      updatedState.cache[act.payload.metricId] = act.payload.points;
-      updatedState.configs.get(act.payload.metricId).add({});
-      // ^ no restrictions, so all lines will be rendered
-      return updatedState;
-
-    case ActionTypes.FAILED_TO_FETCH_POINTS:
-      act = action as IFailedToFetchPoints;
-      console.log(
-        `FAILED TO FETCH POINTS FOR ${act.payload.metricId}!!! msg: ${act.payload.msg}`
-      );
-      return { ...state, last_message: act.payload.msg };
-
-    default:
-      return state;
+  const reducer = reducers[action.type];
+  if (!reducer) {
+    console.log(
+      `Returning current state for unknown action type: ${action.type}`
+    );
+    return state;
   }
+  return reducer(state, action);
 };
