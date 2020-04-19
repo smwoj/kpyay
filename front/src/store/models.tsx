@@ -1,8 +1,4 @@
-import * as _ from "lodash";
-//
-// function dedup<T>(ts: T[]): T[] {
-//   return _.uniqWith(ts, _.isEqual);
-// }
+import { DefaultDict, BFSet } from "../lib/collections";
 
 export interface RawPoint {
   value: number;
@@ -111,29 +107,11 @@ export class Point {
   }
 }
 
-// export class ChartRestrictions {
-//   readonly restrictions: { [param: string]: string };
-//
-//   static parse(str: string): ChartRestrictions {
-//     const entries = str.split(",").map((pair) => [...pair.split("=")]);
-//     return new this(Object.fromEntries(entries));
-//   }
-//
-//   constructor(restrictions: { [param: string]: string }) {
-//     this.restrictions = restrictions;
-//   }
-//
-//   hash(): string {
-//     return Object.entries(this.restrictions)
-//       .map(([param, value]) => `${param}=${value}`)
-//       .sort()
-//       .join(", ");
-//   }
-// }
 export type Restrictions = { [param: string]: string };
 
 export interface AppState {
   cache: { [metricId: string]: Point[] };
-  configs: { [metricId: string]: Restrictions[] };
+  // configs: { [metricId: string]: BFSet<Restrictions> };
+  configs: DefaultDict<BFSet<Restrictions>>;
   last_message: string;
 }

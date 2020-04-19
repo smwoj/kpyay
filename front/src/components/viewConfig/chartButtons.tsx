@@ -1,10 +1,29 @@
 import { Button, Dropdown, Menu } from "antd";
 import * as React from "react";
 import * as _ from "underscore";
+import { connect } from "react-redux";
+import { Action } from "redux";
+import {
+  restrictAction,
+  deleteChartAction,
+  splitByAction,
+} from "../../store/actions";
+import { Restrictions } from "../../store/models";
 
-export const DeleteButton = (props: { deleteCallback: () => void }) => (
-  <Button onClick={() => props.deleteCallback()}>hide</Button>
+const _DeleteButton = (
+  props: { metricId: string; restrictions: Restrictions } & {
+    dispatch: (a: Action) => void;
+  }
+) => (
+  <Button
+    onClick={() =>
+      props.dispatch(deleteChartAction(props.metricId, props.restrictions))
+    }
+  >
+    delete
+  </Button>
 );
+export const DeleteButton = connect()(_DeleteButton);
 
 /**
  * Button with dropdown menu.
@@ -34,16 +53,25 @@ export const ExecutablesDropdown = (props: {
  * ExecutablesDropdown wrapper.
  * Knows how to dispatch redux action for limiting the number of lines on chart.
  */
-export const SelectDropdown = (props: {
-  paramName: string;
-  variants: string[];
-  select: (restriction: string) => void;
-}): JSX.Element => {
+const _SelectDropdown = (
+  props: {
+    paramName: string;
+    variants: string[];
+    metricId: string;
+    restrictions: Restrictions;
+  } & {
+    dispatch: (a: Action) => void;
+  }
+): JSX.Element => {
+  const { paramName, metricId, restrictions } = props;
   const text = `select ${props.paramName}`;
   const variantsToExecutors = _.object(
     props.variants.map((variant) => [
       variant,
-      () => props.select(`${props.paramName}=${variant}`),
+      () =>
+        props.dispatch(
+          restrictAction(metricId, restrictions, paramName, variant)
+        ),
     ])
   );
   return (
@@ -54,20 +82,36 @@ export const SelectDropdown = (props: {
   );
 };
 
+export const SelectDropdown = connect()(_SelectDropdown);
+
 /**
  * ExecutablesDropdown wrapper.
  * Knows how to dispatch redux action for splitting chart.
  */
-export const SplitByDropdown = (props: {
-  paramName: string;
-  variants: string[];
-  splitBy: (param: string) => void;
-}): JSX.Element => {
-  const text = `split by ${props.paramName}`; // rename to split by
+const _SplitByDropdown = (
+  // PRZECIEZ TO NIE POTRZEBUJE DROPDOWNA? wtf - TODO - zrób z tego baton
+  props: {
+    paramName: string;
+    variants: string[];
+    metricId: string;
+    restrictions: Restrictions;
+  } & {
+    dispatch: (a: Action) => void;
+  }
+): JSX.Element => {
+  const text = `split by ${props.paramName}`;
   const variantsToExecutors = _.object(
     props.variants.map((variant) => [
       variant,
-      () => props.splitBy(props.paramName),
+      () =>
+        props.dispatch(
+          splitByAction(
+            props.metricId,
+            props.restrictions,
+            props.paramName,
+            props.variants
+          )
+        ),
     ])
   );
   return (
@@ -77,3 +121,4 @@ export const SplitByDropdown = (props: {
     />
   );
 };
+export const SplitByDropdown = connect()(_SplitByDropdown);

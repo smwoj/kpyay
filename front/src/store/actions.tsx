@@ -1,5 +1,5 @@
 import { Action } from "redux";
-import { Point } from "./models";
+import { Point, Restrictions } from "./models";
 
 export const ActionTypes = {
   INIT_STORE: "INIT_STORE",
@@ -14,20 +14,25 @@ export interface IInitStoreAction extends Action {}
 
 export interface IDeleteChart extends Action {
   payload: {
-    chartId: string;
+    metricId: string;
+    restrictions: Restrictions;
   };
 }
 export interface IRestrict extends Action {
   payload: {
-    chartId: string;
-    restriction: string;
+    metricId: string;
+    restrictions: Restrictions;
+    restrictedParam: string;
+    restrictedToValue: string;
   };
 }
 
 export interface ISplitBy extends Action {
   payload: {
-    chartId: string;
+    metricId: string;
+    restrictions: Restrictions;
     param: string;
+    variants: string[];
   };
 }
 
@@ -48,24 +53,37 @@ export const initStoreAction = (): IInitStoreAction => {
   return { type: ActionTypes.INIT_STORE };
 };
 
-export const deleteChartAction = (chartId: string): IDeleteChart => {
-  return { type: ActionTypes.DELETE_CHART, payload: { chartId } };
-};
-
-export const addRestrictionAction = (
-  chartId: string,
-  restriction: string
-): IRestrict => {
+export const deleteChartAction = (
+  metricId: string,
+  restrictions: Restrictions
+): IDeleteChart => {
   return {
-    type: ActionTypes.ADD_RESTRICTION,
-    payload: { chartId, restriction },
+    type: ActionTypes.DELETE_CHART,
+    payload: { metricId, restrictions },
   };
 };
 
-export const splitByAction = (chartId: string, param: string): ISplitBy => {
+export const restrictAction = (
+  metricId: string,
+  restrictions: Restrictions,
+  restrictedParam: string,
+  restrictedToValue: string
+): IRestrict => {
+  return {
+    type: ActionTypes.ADD_RESTRICTION,
+    payload: { metricId, restrictions, restrictedParam, restrictedToValue },
+  };
+};
+
+export const splitByAction = (
+  metricId: string,
+  restrictions: Restrictions,
+  param: string,
+  variants: string[]
+): ISplitBy => {
   return {
     type: ActionTypes.SPLIT_BY,
-    payload: { chartId, param },
+    payload: { metricId, restrictions, param, variants },
   };
 };
 

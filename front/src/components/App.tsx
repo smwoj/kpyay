@@ -5,7 +5,7 @@ import { useWindowSize } from "./hooks";
 import { Chart } from "./charts/Chart";
 import { AppState, paramsHash, Point, Restrictions } from "../store/models";
 import {
-  addRestrictionAction,
+  restrictAction,
   deleteChartAction,
   splitByAction,
 } from "../store/actions";
@@ -22,17 +22,15 @@ const configsToCharts = (
   restrictionsArr: Restrictions[],
   metricId: string,
   chartWidth: number,
-  chartHeight: number,
-  dispatch: (a: Action) => void
+  chartHeight: number
 ): JSX.Element[] => {
-  console.log(restrictionsArr);
   return restrictionsArr.map((restrictions) => {
-    const ioOk = (p: Point): boolean => {
+    const isOk = (p: Point): boolean => {
       return _.entries(restrictions).every(([param, value]) => {
         return p._params[param] == value;
       });
     };
-    const points = cache[metricId].filter((p) => ioOk(p));
+    const points = cache[metricId].filter(isOk);
     const data = calculate(points, "version"); // TODO POPRAW ŻEBY W KONFIGU
     return (
       <Chart
@@ -41,15 +39,7 @@ const configsToCharts = (
         width={chartWidth}
         height={chartHeight}
         data={data}
-        deleteChart={(chartId) => {
-          dispatch(deleteChartAction(chartId));
-        }}
-        select={(chartId, restriction) => {
-          dispatch(addRestrictionAction(chartId, restriction));
-        }}
-        splitBy={(chartId, param) => {
-          dispatch(splitByAction(chartId, param));
-        }}
+        restrictions={restrictions}
       />
     );
   });
@@ -67,15 +57,14 @@ const Spa = (
 
   console.log(props.configs);
   const charts = _.flatMap(
-    _.entries(props.configs),
-    ([metricId, restrictionsArray]) => {
+    [...props.configs],
+    ([metricId, restrictionsSet]) => {
       return configsToCharts(
         props.cache,
-        restrictionsArray,
+        [...restrictionsSet],
         metricId,
         chartWidth,
-        chartHeight,
-        props.dispatch
+        chartHeight
       );
     }
   );

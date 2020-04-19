@@ -17,17 +17,8 @@ import {
   SelectDropdown,
 } from "../viewConfig/chartButtons";
 import { ChartData } from "./calculate";
-
-export interface ChartProps {
-  width: number;
-  height: number;
-  data: ChartData;
-  metricId: string;
-  // TODO: zbinduj po ludzku przez connect
-  deleteChart(selfId: string): void;
-  select(selfId: string, restriction: string): void;
-  splitBy(selfId: string, param: string): void;
-}
+import { connect } from "react-redux";
+import { Action } from "redux";
 
 const Title = (props: {
   metricId: string;
@@ -47,7 +38,17 @@ const Title = (props: {
   return <h1>{props.metricId + title_descr}</h1>;
 };
 
-export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
+const _Chart = (
+  props: {
+    width: number;
+    height: number;
+    data: ChartData;
+    metricId: string;
+    restrictions: { [param: string]: string };
+  } & { dispatch: (a: Action) => void }
+) => {
+  const { metricId, restrictions } = props;
+
   const selectDropdowns = Object.entries(
     props.data.paramsToVariants
   ).map(([param, variants]) => (
@@ -55,9 +56,11 @@ export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
       key={param}
       paramName={param}
       variants={variants}
-      select={(restriction) => props.select("MOJE MOCKOWE ID", restriction)}
+      metricId={metricId}
+      restrictions={restrictions}
     />
   ));
+
   const splitByDropdowns = Object.entries(
     props.data.paramsToVariants
   ).map(([param, variants]) => (
@@ -65,7 +68,8 @@ export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
       key={param}
       paramName={param}
       variants={variants}
-      splitBy={(param) => props.splitBy("MOJE MOCKOWE ID", param)}
+      metricId={metricId}
+      restrictions={restrictions}
     />
   ));
 
@@ -77,13 +81,10 @@ export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
   return (
     <div className="chartBox">
       <div className="chart-title-div">
-        <Title
-          metricId={props.metricId}
-          noChoiceParams={props.data.noChoiceParams}
-        />
+        <Title metricId={metricId} noChoiceParams={props.data.noChoiceParams} />
       </div>
       <div id="config-buttons-div">
-        <DeleteButton deleteCallback={() => props.deleteChart("DUPA-ID")} />
+        <DeleteButton metricId={metricId} restrictions={restrictions} />
         {selectDropdowns}
         {splitByDropdowns}
       </div>
@@ -106,3 +107,5 @@ export const Chart: React.FC<ChartProps> = (props: ChartProps) => {
     </div>
   );
 };
+
+export const Chart = connect()(_Chart);

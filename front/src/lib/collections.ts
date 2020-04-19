@@ -4,9 +4,9 @@ export class DefaultDict<T> {
   data: { [keys: string]: T };
   init: () => T;
 
-  constructor(defaultInit: () => T) {
-    this.data = {};
+  constructor(defaultInit: () => T, data?: { [keys: string]: T }) {
     this.init = defaultInit;
+    this.data = data ? data : {};
   }
 
   get(key: string): T {
@@ -21,6 +21,10 @@ export class DefaultDict<T> {
     for (let item of view) {
       yield item;
     }
+  }
+
+  clone(): DefaultDict<T> {
+    return new DefaultDict<T>(this.init, { ...this.data });
   }
 }
 
