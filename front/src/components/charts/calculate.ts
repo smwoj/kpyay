@@ -1,7 +1,7 @@
-import { paramsHash, Point } from "../../store/models";
 import * as __ from "lodash";
 import * as _ from "underscore";
 import { DefaultDict } from "../../lib/collections/DefaultDict";
+import { paramsHash, Point } from "../../models/Point";
 
 type NoChoiceParams = { [param: string]: string };
 type ParamVariants = { [param: string]: string[] };

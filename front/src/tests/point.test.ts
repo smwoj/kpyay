@@ -1,4 +1,5 @@
-import { Version, Point } from "../store/models";
+import { Version } from "../models/Version";
+import { Point } from "../models/Point";
 
 describe("Point", () => {
   it("correctly hashes params ", () => {

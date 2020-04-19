@@ -6,8 +6,8 @@ import {
   fetchedPointsAction,
 } from "../store/actions";
 import * as React from "react";
-import { Point } from "../store/models";
 import * as mock_data from "../mock_data/data";
+import { Point } from "../models/Point";
 const MOCK_DATA: { [metricId: string]: Point[] } = {
   "sloths-pastry f-score": mock_data.SLOTHS_VS_PASTRY_FSCORES,
   beta: mock_data.DOGS_VS_MUFFINS_FSCORES,

@@ -3,7 +3,7 @@ import { connect, Provider } from "react-redux";
 import { configureStore, initStore } from "../store/init";
 import { useWindowSize } from "./hooks";
 import { Chart } from "./charts/Chart";
-import { AppState, paramsHash, Point, Restrictions } from "../store/models";
+import { AppState, Restrictions } from "../store/models";
 import {
   restrictAction,
   deleteChartAction,
@@ -16,6 +16,7 @@ import { RouteConfig } from "react-router-config";
 import MetricIdInput from "./MetricIdInput";
 import { Action } from "redux";
 import * as _ from "lodash";
+import { paramsHash, Point } from "../models/Point";
 
 const configsToCharts = (
   cache: { [metricId: string]: Point[] },

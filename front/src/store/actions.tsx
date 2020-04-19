@@ -1,5 +1,6 @@
 import { Action } from "redux";
-import { Point, Restrictions } from "./models";
+import { Restrictions } from "./models";
+import { Point } from "../models/Point";
 
 export const ActionTypes = {
   INIT_STORE: "INIT_STORE",

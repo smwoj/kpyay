@@ -1,4 +1,4 @@
-import { Version } from "../store/models";
+import { Version } from "../models/Version";
 
 describe("Version", () => {
   it("provides access to version segments", () => {
