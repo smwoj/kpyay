@@ -10,8 +10,6 @@ export const ActionTypes = {
   FAILED_TO_FETCH_POINTS: "FAILED_TO_FETCH_POINTS",
 };
 
-export interface IInitStoreAction extends Action {}
-
 export interface IDeleteChart extends Action {
   payload: {
     metricId: string;
@@ -49,7 +47,7 @@ export interface IFailedToFetchPoints extends Action {
   };
 }
 
-export const initStoreAction = (): IInitStoreAction => {
+export const initStoreAction = (): Action => {
   return { type: ActionTypes.INIT_STORE };
 };
 

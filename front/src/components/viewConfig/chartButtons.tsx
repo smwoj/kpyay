@@ -10,8 +10,12 @@ import {
 } from "../../store/actions";
 import { Restrictions } from "../../store/models";
 
+interface DeleteButtonProps {
+  metricId: string;
+  restrictions: Restrictions;
+}
 const _DeleteButton = (
-  props: { metricId: string; restrictions: Restrictions } & {
+  props: DeleteButtonProps & {
     dispatch: (a: Action) => void;
   }
 ) => (
@@ -23,7 +27,10 @@ const _DeleteButton = (
     delete
   </Button>
 );
-export const DeleteButton = connect()(_DeleteButton);
+
+export const DeleteButton: React.FunctionComponent<DeleteButtonProps> = connect()(
+  _DeleteButton
+);
 
 /**
  * Button with dropdown menu.
@@ -33,12 +40,12 @@ export const ExecutablesDropdown = (props: {
   text: string;
   variantsToExecutors: { [variant: string]: () => void };
 }): JSX.Element => {
-  const menu_items = _.map(props.variantsToExecutors, (executor, variant) => (
+  const menuItems = _.map(props.variantsToExecutors, (executor, variant) => (
     <Menu.Item key={variant}>
       <Button onClick={executor}>{variant}</Button>
     </Menu.Item>
   ));
-  const menu = <Menu>{menu_items}</Menu>;
+  const menu = <Menu>{menuItems}</Menu>;
 
   return (
     <Dropdown overlay={menu} placement="bottomLeft">
@@ -88,8 +95,7 @@ export const SelectDropdown = connect()(_SelectDropdown);
  * ExecutablesDropdown wrapper.
  * Knows how to dispatch redux action for splitting chart.
  */
-const _SplitByDropdown = (
-  // PRZECIEZ TO NIE POTRZEBUJE DROPDOWNA? wtf - TODO - zrób z tego baton
+const _SplitByButton = (
   props: {
     paramName: string;
     variants: string[];
@@ -99,26 +105,15 @@ const _SplitByDropdown = (
     dispatch: (a: Action) => void;
   }
 ): JSX.Element => {
-  const text = `split by ${props.paramName}`;
-  const variantsToExecutors = _.object(
-    props.variants.map((variant) => [
-      variant,
-      () =>
-        props.dispatch(
-          splitByAction(
-            props.metricId,
-            props.restrictions,
-            props.paramName,
-            props.variants
-          )
-        ),
-    ])
-  );
+  const { paramName, variants, metricId, restrictions } = props;
   return (
-    <ExecutablesDropdown
-      text={text}
-      variantsToExecutors={variantsToExecutors}
-    />
+    <Button
+      onClick={() =>
+        props.dispatch(
+          splitByAction(metricId, restrictions, paramName, variants)
+        )
+      }
+    >{`split by ${paramName}`}</Button>
   );
 };
-export const SplitByDropdown = connect()(_SplitByDropdown);
+export const SplitByButton = connect()(_SplitByButton);

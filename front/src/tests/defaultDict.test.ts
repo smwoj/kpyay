@@ -1,4 +1,4 @@
-import { DefaultDict } from "../lib/collections";
+import { DefaultDict } from "../lib/collections/DefaultDict";
 
 describe("DefaultDict", () => {
   it("does its thing for arrays", () => {

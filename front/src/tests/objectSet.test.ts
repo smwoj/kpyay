@@ -1,4 +1,4 @@
-import { BFSet } from "../lib/collections";
+import { BFSet } from "../lib/collections/BFSet";
 
 describe("BFSet", () => {
   it("dedups & spreads like mayo", () => {

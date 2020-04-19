@@ -1,41 +1,13 @@
 import * as _ from "lodash";
 
-export class DefaultDict<T> {
-  data: { [keys: string]: T };
-  init: () => T;
-
-  constructor(defaultInit: () => T, data?: { [keys: string]: T }) {
-    this.init = defaultInit;
-    this.data = data ? data : {};
-  }
-
-  get(key: string): T {
-    if (!(key in this.data)) {
-      this.data[key] = this.init();
-    }
-    return this.data[key];
-  }
-
-  *[Symbol.iterator]() {
-    const view = _.entries(this.data);
-    for (let item of view) {
-      yield item;
-    }
-  }
-
-  clone(): DefaultDict<T> {
-    return new DefaultDict<T>(this.init, { ...this.data });
-  }
-}
-
-/** Set using value equality for objects (instead of refs equality).
- * > things = new ObjectSet([{a: 1}, {a:1 }])
- * > [...things]
- * [{a: 1}]
- * */
+/** Set using value equality for objects (instead of refs equality). */
 export class BFSet<T> {
-  // BruteForceSet; TODO: turn into a civilized HashSet
+  //  * > things = new BFSet([{a: 1}, {a:1 }])
+  //  * > [...things]
+  //  * [{a: 1}]
+  // TODO: turn into a civilized HashSet instead of BruteForceSet
   _items: T[];
+
   constructor(items?: T[]) {
     if (items) {
       this._items = _.uniqWith(items, _.isEqual);
@@ -72,7 +44,7 @@ export class BFSet<T> {
 
   *[Symbol.iterator]() {
     const view = this._items.slice();
-    for (let item of view) {
+    for (const item of view) {
       yield item;
     }
   }

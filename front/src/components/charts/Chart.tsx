@@ -13,7 +13,7 @@ import { pickColour } from "../../lib/colourPicker";
 import { CustomizedAxisTick } from "./AxisTick";
 import {
   DeleteButton,
-  SplitByDropdown,
+  SplitByButton,
   SelectDropdown,
 } from "../viewConfig/chartButtons";
 import { ChartData } from "./calculate";
@@ -24,18 +24,18 @@ const Title = (props: {
   metricId: string;
   noChoiceParams: { [param: string]: string };
 }): JSX.Element => {
-  let title_descr: string;
+  let title: string;
   if (Object.entries(props.noChoiceParams).length) {
-    title_descr =
+    title =
       " (" +
       Object.entries(props.noChoiceParams)
         .map(([param, value]) => `${param}=${value}`)
         .join(", ") +
       ")";
   } else {
-    title_descr = "";
+    title = "";
   }
-  return <h1>{props.metricId + title_descr}</h1>;
+  return <h1>{props.metricId + title}</h1>;
 };
 
 const _Chart = (
@@ -61,10 +61,10 @@ const _Chart = (
     />
   ));
 
-  const splitByDropdowns = Object.entries(
+  const splitByButtons = Object.entries(
     props.data.paramsToVariants
   ).map(([param, variants]) => (
-    <SplitByDropdown
+    <SplitByButton
       key={param}
       paramName={param}
       variants={variants}
@@ -86,7 +86,7 @@ const _Chart = (
       <div id="config-buttons-div">
         <DeleteButton metricId={metricId} restrictions={restrictions} />
         {selectDropdowns}
-        {splitByDropdowns}
+        {splitByButtons}
       </div>
       <div>
         <LineChart

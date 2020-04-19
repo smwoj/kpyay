@@ -1,11 +1,12 @@
-import { DefaultDict, BFSet } from "../lib/collections";
+import { DefaultDict } from "../lib/collections/DefaultDict";
+import { BFSet } from "../lib/collections/BFSet";
 
 export interface RawPoint {
   value: number;
   version: string | null;
   params: { [param: string]: string };
   timestamp: string;
-  posted_ts: string;
+  postedTimestamp: string;
 }
 
 export class Version {
@@ -17,7 +18,9 @@ export class Version {
   static parse(str: string): Version {
     const segments = str.split(".").map((x) => Number.parseInt(x, 10));
     if (segments.some(Number.isNaN)) {
-      throw `str is broken: ${str}: part of it is not parseable as int`;
+      throw new Error(
+        `str is broken: ${str}: part of it is not parseable as int`
+      );
     }
     return new this(segments[0], segments[1], segments[2]);
   }
@@ -59,18 +62,18 @@ export class Point {
   readonly _version: Version | null;
   readonly _params: { [param: string]: string };
   readonly _timestamp: Date;
-  readonly _posted_ts: Date;
+  readonly _postedTimestamp: Date;
 
   static fromRaw(rp: RawPoint): Point {
-    const { value, version, params, timestamp, posted_ts } = rp;
-    const parsed_version = version ? Version.parse(version) : null;
+    const { value, version, params, timestamp, postedTimestamp } = rp;
+    const parsedVersion = version ? Version.parse(version) : null;
 
     return new this(
       value,
-      parsed_version,
+      parsedVersion,
       params,
       new Date(timestamp),
-      new Date(posted_ts)
+      new Date(postedTimestamp)
     );
   }
 
@@ -80,13 +83,13 @@ export class Point {
     params: { [param: string]: string },
     timestamp: Date,
 
-    posted_ts: Date
+    postedTimestamp: Date
   ) {
     this._value = value;
     this._version = version;
     this._params = params;
     this._timestamp = timestamp;
-    this._posted_ts = posted_ts;
+    this._postedTimestamp = postedTimestamp;
   }
 
   paramsHash(): string {
@@ -97,7 +100,9 @@ export class Point {
     if (left._version && right._version) {
       return Version.ordAsc(left._version, right._version);
     } else {
-      throw `cannot cmp points; at least one does not have a version. left: ${left}, right: ${right}`;
+      throw new Error(
+        `cannot cmp points; at least one does not have a version. left: ${left}, right: ${right}`
+      );
     }
   }
 

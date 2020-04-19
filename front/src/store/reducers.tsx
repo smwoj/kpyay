@@ -9,7 +9,8 @@ import {
   IFailedToFetchPoints,
 } from "./actions";
 import * as mock_data from "../mock_data/data";
-import { BFSet, DefaultDict } from "../lib/collections";
+import { DefaultDict } from "../lib/collections/DefaultDict";
+import { BFSet } from "../lib/collections/BFSet";
 
 const INIT_STATE: AppState = {
   cache: {
@@ -37,7 +38,8 @@ const INIT_STATE: AppState = {
 
 // todo: podziel i zrób mapę
 export const rootReducer = (state: AppState, action: Action): AppState => {
-  let act, newConfigs;
+  let act;
+  let newConfigs;
   console.log("Reducer odpalony", action);
 
   switch (action.type) {
@@ -62,9 +64,9 @@ export const rootReducer = (state: AppState, action: Action): AppState => {
         `RESTRICTING CHART! ${act.payload.metricId} with ${act.payload.restrictedParam}=${act.payload.restrictedToValue}`
       );
       newConfigs = state.configs.clone();
-      let restrictionsSet = newConfigs.get(act.payload.metricId);
+      const restrictionsSet = newConfigs.get(act.payload.metricId);
       restrictionsSet.remove(act.payload.restrictions);
-      let newRestrictions = { ...act.payload.restrictions };
+      const newRestrictions = { ...act.payload.restrictions };
       newRestrictions[act.payload.restrictedParam] =
         act.payload.restrictedToValue;
       restrictionsSet.add(newRestrictions);
@@ -76,7 +78,7 @@ export const rootReducer = (state: AppState, action: Action): AppState => {
         `SPLITTING CHART  ${act.payload.metricId}! Creating new chart for each variant of ${act.payload.param}.`
       );
       newConfigs = state.configs.clone();
-      let restrictions = newConfigs.get(act.payload.metricId);
+      const restrictions = newConfigs.get(act.payload.metricId);
       restrictions.remove(act.payload.restrictions);
       act.payload.variants.forEach((variant) => {
         const newRestrictions = { ...act.payload.restrictions };
@@ -92,7 +94,7 @@ export const rootReducer = (state: AppState, action: Action): AppState => {
       console.log(
         `FETCHED METRIC ${act.payload.metricId}! Adding it's point's to state.`
       );
-      let updatedState = { ...state };
+      const updatedState = { ...state };
       updatedState.cache = { ...updatedState.cache };
       //  ^^^ avoid shallow copies interfering with re-rendering
       // TODO: sprawdź czy to serio problem i dlaczego
