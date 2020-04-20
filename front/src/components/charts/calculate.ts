@@ -74,11 +74,11 @@ export const calculate = (
   });
 
   return {
-    data: __.map(groups.data, (ps, version) => {
+    data: __.map(groups.data, (ps, xacc) => {
       const data: any = _.object(
         ps.map((p) => [relevantParamsHash(p), p._value])
       );
-      data._version = version; // TODO: TAJMSTAMPY
+      data[xAccessor] = xacc;
       return data;
     }),
     hashes: [...hashes],

@@ -98,7 +98,14 @@ const _Chart = (
           data={props.data.data}
         >
           <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-          <XAxis dataKey="_version" height={50} tick={CustomizedAxisTick} />
+          <XAxis
+            dataKey={spec.xAccessor}
+            height={50}
+            tick={CustomizedAxisTick}
+            tickSize={3}
+            interval={2}
+          />
+          {/*  TODO: cwanie policz interval żeby zawsze było 5-10 ticków*/}
           <YAxis type="number" domain={[0.5, 1.1]} />
           {/*TODO: ^^ calculate in calculate*/}
           <CartesianGrid stroke="#eeeeee" strokeDasharray="5 5" />

@@ -21,15 +21,13 @@ const INIT_STATE: AppState = {
     beta: mock_data.SLOTHS_VS_PASTRY_FSCORES,
   },
   configs: new DefaultDict<BFSet<ChartSpec>>(() => new BFSet<ChartSpec>(), {
-    alfa: new BFSet([
-      { xAccessor: "version", restrictions: {} },
-      { xAccessor: "version", restrictions: { team: "green" } },
+    // alfa: new BFSet([
+    //   { xAccessor: "version", restrictions: {} },
+    //   { xAccessor: "version", restrictions: { team: "green" } },
+    // ] as ChartSpec[]),
+    beta: new BFSet([
+      { xAccessor: "timestamp", restrictions: { team: "foxtrot" } },
     ] as ChartSpec[]),
-    // beta: new BFSet([
-    // { team: "echo" },
-    // { classifier: "cnn-eta" },
-    // ] as Restrictions[]),
-    // beta: new BFSet([{}]),
   }),
   last_message: "", // todo: make it expire
 };
