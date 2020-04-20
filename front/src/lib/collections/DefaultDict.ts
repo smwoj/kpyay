@@ -23,8 +23,4 @@ export class DefaultDict<T> {
       yield item;
     }
   }
-
-  clone(): DefaultDict<T> {
-    return new DefaultDict<T>(this.init, { ...this.data });
-  }
 }

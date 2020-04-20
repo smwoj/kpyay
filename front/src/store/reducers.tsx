@@ -11,6 +11,7 @@ import {
 import * as mock_data from "../mock_data/data";
 import { DefaultDict } from "../lib/collections/DefaultDict";
 import { BFSet } from "../lib/collections/BFSet";
+import * as _ from "lodash";
 
 const INIT_STATE: AppState = {
   cache: {
@@ -47,68 +48,82 @@ const reduceDeleteChart = (state: AppState, action: IDeleteChart): AppState => {
       action.payload.metricId
     } with restrictions ${JSON.stringify(action.payload.restrictions)}`
   );
-  const newConfigs = state.configs.clone();
+  const newConfigs = _.cloneDeep(state.configs);
   newConfigs.get(action.payload.metricId).remove(action.payload.restrictions);
   return { ...state, configs: newConfigs };
 };
 
 const reduceAddRestriction = (state: AppState, action: IRestrict): AppState => {
+  const {
+    metricId,
+    restrictions,
+    restrictedParam,
+    restrictedToValue,
+  } = action.payload;
   console.log(
-    `RESTRICTING CHART! ${action.payload.metricId} with ${action.payload.restrictedParam}=${action.payload.restrictedToValue}`
+    `RESTRICTING CHART! ${metricId} with ${restrictedParam}=${restrictedToValue}`
   );
-  const newConfigs = state.configs.clone();
-  const restrictionsSet = newConfigs.get(action.payload.metricId);
-  restrictionsSet.remove(action.payload.restrictions);
-  const newRestrictions = { ...action.payload.restrictions };
-  newRestrictions[action.payload.restrictedParam] =
-    action.payload.restrictedToValue;
+  const newConfigs = _.cloneDeep(state.configs);
+  const restrictionsSet = newConfigs.get(metricId);
+
+  restrictionsSet.remove(restrictions);
+  const newRestrictions = { ...restrictions };
+  newRestrictions[restrictedParam] = restrictedToValue;
   restrictionsSet.add(newRestrictions);
   return { ...state, configs: newConfigs };
 };
+
 const reduceSplitBy = (state: AppState, action: ISplitBy): AppState => {
+  const { metricId, variants, restrictions, param } = action.payload;
   console.log(
-    `SPLITTING CHART  ${action.payload.metricId}! Creating new chart for each variant of ${action.payload.param}.`
+    `SPLITTING CHART  ${metricId}! Creating new chart for each variant of ${param}.`
   );
-  const newConfigs = state.configs.clone();
-  const restrictions = newConfigs.get(action.payload.metricId);
-  restrictions.remove(action.payload.restrictions);
-  action.payload.variants.forEach((variant) => {
-    const newRestrictions = { ...action.payload.restrictions };
+  const newConfigs = _.cloneDeep(state.configs);
+
+  const restrictionsSet = newConfigs.get(metricId);
+  restrictionsSet.remove(restrictions);
+  // ^^ rm the original chart on which "split by" was clicked...
+  // ...and add new versions supplied with one variant each
+  variants.forEach((variant) => {
+    const newRestrictions = { ...restrictions };
     newRestrictions[action.payload.param] = variant;
-    restrictions.add(newRestrictions);
+    restrictionsSet.add(newRestrictions);
   });
 
   return { ...state, configs: newConfigs };
 };
+
 const reduceFetchedPoints = (
   state: AppState,
   action: IFetchedPoints
 ): AppState => {
-  // todo nie feczuj jak już jest
-  console.log(
-    `FETCHED METRIC ${action.payload.metricId}! Adding it's point's to state.`
-  );
-  const updatedState = { ...state };
-  updatedState.cache = { ...updatedState.cache };
-  //  ^^^ avoid shallow copies interfering with re-rendering
-  // TODO: sprawdź czy to serio problem i dlaczego
-  updatedState.cache[action.payload.metricId] = action.payload.points;
-  updatedState.configs.get(action.payload.metricId).add({});
-  // ^ no restrictions, so all lines will be rendered
-  return updatedState;
+  // todo: if these points are already available don't fetch the data in the first place
+  const { metricId, points } = action.payload;
+  console.log(`FETCHED METRIC ${metricId}! Adding it's point's to state.`);
+
+  const newConfigs = _.cloneDeep(state.configs);
+  newConfigs.get(metricId).add({});
+
+  const newCache = { ...state.cache };
+  newCache[metricId] = points;
+
+  return {
+    configs: newConfigs,
+    cache: newCache,
+    last_message: state.last_message,
+  };
 };
 
 const reduceFailedToFetchPoints = (
   state: AppState,
   action: IFailedToFetchPoints
 ): AppState => {
-  console.log(
-    `FAILED TO FETCH POINTS FOR ${action.payload.metricId}!!! msg: ${action.payload.msg}`
-  );
-  return { ...state, last_message: action.payload.msg };
+  const { metricId, msg } = action.payload;
+  console.log(`FAILED TO FETCH POINTS FOR ${metricId}!!! msg: ${msg}`);
+  return { ...state, last_message: msg };
 };
 
-const reducers = (() => {
+const reducersByActionType = (() => {
   const reducers: { [actionType: string]: Reducer } = {};
   reducers[ActionTypes.INIT_STORE] = reduceInit;
   reducers[ActionTypes.DELETE_CHART] = reduceDeleteChart;
@@ -120,8 +135,9 @@ const reducers = (() => {
 })();
 
 export const rootReducer = (state: AppState, action: Action): AppState => {
-  const reducer = reducers[action.type];
+  const reducer = reducersByActionType[action.type];
   if (!reducer) {
+    // redux reserves right to dispatch some internal actions
     console.log(
       `Returning current state for unknown action type: ${action.type}`
     );
