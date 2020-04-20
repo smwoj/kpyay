@@ -1,5 +1,5 @@
 import { Action } from "redux";
-import { Restrictions } from "./models";
+import { ChartSpec } from "./models";
 import { Point } from "../models/Point";
 
 export const ActionTypes = {
@@ -9,18 +9,19 @@ export const ActionTypes = {
   SPLIT_BY: "SPLIT_BY",
   FETCHED_POINTS: "FETCHED_POINTS",
   FAILED_TO_FETCH_POINTS: "FAILED_TO_FETCH_POINTS",
+  SWITCH_X_AXIS: "SWITCH_X_AXIS",
 };
 
 export interface IDeleteChart extends Action {
   payload: {
     metricId: string;
-    restrictions: Restrictions;
+    spec: ChartSpec;
   };
 }
 export interface IRestrict extends Action {
   payload: {
     metricId: string;
-    restrictions: Restrictions;
+    spec: ChartSpec;
     restrictedParam: string;
     restrictedToValue: string;
   };
@@ -29,7 +30,7 @@ export interface IRestrict extends Action {
 export interface ISplitBy extends Action {
   payload: {
     metricId: string;
-    restrictions: Restrictions;
+    spec: ChartSpec;
     param: string;
     variants: string[];
   };
@@ -47,6 +48,12 @@ export interface IFailedToFetchPoints extends Action {
     msg: string;
   };
 }
+export interface ISwitchXAxis extends Action {
+  payload: {
+    metricId: string;
+    spec: ChartSpec;
+  };
+}
 
 export const initStoreAction = (): Action => {
   return { type: ActionTypes.INIT_STORE };
@@ -54,35 +61,35 @@ export const initStoreAction = (): Action => {
 
 export const deleteChartAction = (
   metricId: string,
-  restrictions: Restrictions
+  spec: ChartSpec
 ): IDeleteChart => {
   return {
     type: ActionTypes.DELETE_CHART,
-    payload: { metricId, restrictions },
+    payload: { metricId, spec: spec },
   };
 };
 
 export const restrictAction = (
   metricId: string,
-  restrictions: Restrictions,
+  spec: ChartSpec,
   restrictedParam: string,
   restrictedToValue: string
 ): IRestrict => {
   return {
     type: ActionTypes.ADD_RESTRICTION,
-    payload: { metricId, restrictions, restrictedParam, restrictedToValue },
+    payload: { metricId, spec: spec, restrictedParam, restrictedToValue },
   };
 };
 
 export const splitByAction = (
   metricId: string,
-  restrictions: Restrictions,
+  spec: ChartSpec,
   param: string,
   variants: string[]
 ): ISplitBy => {
   return {
     type: ActionTypes.SPLIT_BY,
-    payload: { metricId, restrictions, param, variants },
+    payload: { metricId, spec, param, variants },
   };
 };
 
@@ -103,5 +110,18 @@ export const failedToFetchPointsAction = (
   return {
     type: ActionTypes.FAILED_TO_FETCH_POINTS,
     payload: { metricId, msg },
+  };
+};
+
+export const switchXAxisAction = (
+  metricId: string,
+  spec: ChartSpec
+): ISwitchXAxis => {
+  return {
+    type: ActionTypes.SWITCH_X_AXIS,
+    payload: {
+      metricId,
+      spec,
+    },
   };
 };

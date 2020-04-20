@@ -10,11 +10,13 @@ export interface RawPoint {
   postedTimestamp: string;
 }
 
-export type Restrictions = { [param: string]: string };
+export type ChartSpec = {
+  xAccessor: "timestamp" | "version";
+  restrictions: { [param: string]: string };
+};
 
 export interface AppState {
   cache: { [metricId: string]: Point[] };
-  // configs: { [metricId: string]: BFSet<Restrictions> };
-  configs: DefaultDict<BFSet<Restrictions>>;
+  configs: DefaultDict<BFSet<ChartSpec>>;
   last_message: string;
 }

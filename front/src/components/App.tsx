@@ -3,7 +3,7 @@ import { connect, Provider } from "react-redux";
 import { configureStore, initStore } from "../store/init";
 import { useWindowSize } from "./hooks";
 import { Chart } from "./charts/Chart";
-import { AppState, Restrictions } from "../store/models";
+import { AppState, ChartSpec } from "../store/models";
 import { calculate } from "./charts/calculate";
 import "./../styles.css";
 import { HashRouter, Route, Switch } from "react-router-dom";
@@ -14,19 +14,20 @@ import { paramsHash, Point } from "../models/Point";
 
 const configsToCharts = (
   cache: { [metricId: string]: Point[] },
-  restrictionsArr: Restrictions[],
+  specs: ChartSpec[],
   metricId: string,
   chartWidth: number,
   chartHeight: number
 ): JSX.Element[] => {
-  return restrictionsArr.map((restrictions) => {
+  return specs.map((spec) => {
+    const { restrictions, xAccessor } = spec;
     const isOk = (p: Point): boolean => {
       return _.entries(restrictions).every(([param, value]) => {
         return p._params[param] === value;
       });
     };
     const points = cache[metricId].filter(isOk);
-    const data = calculate(points, "version"); // TODO POPRAW ŻEBY W KONFIGU
+    const data = calculate(points, xAccessor);
     return (
       <Chart
         key={`${metricId}::${paramsHash(restrictions)}`}
@@ -34,7 +35,7 @@ const configsToCharts = (
         width={chartWidth}
         height={chartHeight}
         data={data}
-        restrictions={restrictions}
+        spec={spec}
       />
     );
   });
@@ -51,18 +52,15 @@ const Spa = (
   const chartHeight = height >= 300 ? 300 : height;
 
   console.log(props.configs);
-  const charts = _.flatMap(
-    [...props.configs],
-    ([metricId, restrictionsSet]) => {
-      return configsToCharts(
-        props.cache,
-        [...restrictionsSet],
-        metricId,
-        chartWidth,
-        chartHeight
-      );
-    }
-  );
+  const charts = _.flatMap([...props.configs], ([metricId, chartSpecs]) => {
+    return configsToCharts(
+      props.cache,
+      [...chartSpecs],
+      metricId,
+      chartWidth,
+      chartHeight
+    );
+  });
 
   return (
     <div className="app-div">

@@ -7,12 +7,13 @@ import {
   restrictAction,
   deleteChartAction,
   splitByAction,
+  switchXAxisAction,
 } from "../../store/actions";
-import { Restrictions } from "../../store/models";
+import { ChartSpec } from "../../store/models";
 
 interface DeleteButtonProps {
   metricId: string;
-  restrictions: Restrictions;
+  spec: ChartSpec;
 }
 const _DeleteButton = (
   props: DeleteButtonProps & {
@@ -21,7 +22,7 @@ const _DeleteButton = (
 ) => (
   <Button
     onClick={() =>
-      props.dispatch(deleteChartAction(props.metricId, props.restrictions))
+      props.dispatch(deleteChartAction(props.metricId, props.spec))
     }
   >
     delete
@@ -30,6 +31,32 @@ const _DeleteButton = (
 
 export const DeleteButton: React.FunctionComponent<DeleteButtonProps> = connect()(
   _DeleteButton
+);
+
+interface SwitchXAxisButtonProps {
+  metricId: string;
+  spec: ChartSpec;
+}
+const _SwitchXAxisButton = (
+  props: SwitchXAxisButtonProps & {
+    dispatch: (a: Action) => void;
+  }
+) => {
+  const otherXAccessor =
+    "timestamp" === props.spec.xAccessor ? "version" : "timestamp";
+  return (
+    <Button
+      onClick={() =>
+        props.dispatch(switchXAxisAction(props.metricId, props.spec))
+      }
+    >
+      {`${otherXAccessor} on x-axis`}
+    </Button>
+  );
+};
+
+export const SwitchXAxisButton: React.FunctionComponent<SwitchXAxisButtonProps> = connect()(
+  _SwitchXAxisButton
 );
 
 /**
@@ -65,20 +92,17 @@ const _SelectDropdown = (
     paramName: string;
     variants: string[];
     metricId: string;
-    restrictions: Restrictions;
+    spec: ChartSpec;
   } & {
     dispatch: (a: Action) => void;
   }
 ): JSX.Element => {
-  const { paramName, metricId, restrictions } = props;
+  const { paramName, metricId, spec } = props;
   const text = `select ${props.paramName}`;
   const variantsToExecutors = _.object(
     props.variants.map((variant) => [
       variant,
-      () =>
-        props.dispatch(
-          restrictAction(metricId, restrictions, paramName, variant)
-        ),
+      () => props.dispatch(restrictAction(metricId, spec, paramName, variant)),
     ])
   );
   return (
@@ -100,18 +124,16 @@ const _SplitByButton = (
     paramName: string;
     variants: string[];
     metricId: string;
-    restrictions: Restrictions;
+    spec: ChartSpec;
   } & {
     dispatch: (a: Action) => void;
   }
 ): JSX.Element => {
-  const { paramName, variants, metricId, restrictions } = props;
+  const { paramName, variants, metricId, spec } = props;
   return (
     <Button
       onClick={() =>
-        props.dispatch(
-          splitByAction(metricId, restrictions, paramName, variants)
-        )
+        props.dispatch(splitByAction(metricId, spec, paramName, variants))
       }
     >{`split by ${paramName}`}</Button>
   );

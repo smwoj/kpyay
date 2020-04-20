@@ -15,10 +15,12 @@ import {
   DeleteButton,
   SplitByButton,
   SelectDropdown,
+  SwitchXAxisButton,
 } from "../viewConfig/chartButtons";
 import { ChartData } from "./calculate";
 import { connect } from "react-redux";
 import { Action } from "redux";
+import { ChartSpec } from "../../store/models";
 
 const Title = (props: {
   metricId: string;
@@ -44,10 +46,10 @@ const _Chart = (
     height: number;
     data: ChartData;
     metricId: string;
-    restrictions: { [param: string]: string };
+    spec: ChartSpec;
   } & { dispatch: (a: Action) => void }
 ) => {
-  const { metricId, restrictions } = props;
+  const { metricId, spec } = props;
 
   const selectDropdowns = Object.entries(
     props.data.paramsToVariants
@@ -57,7 +59,7 @@ const _Chart = (
       paramName={param}
       variants={variants}
       metricId={metricId}
-      restrictions={restrictions}
+      spec={spec}
     />
   ));
 
@@ -69,7 +71,7 @@ const _Chart = (
       paramName={param}
       variants={variants}
       metricId={metricId}
-      restrictions={restrictions}
+      spec={spec}
     />
   ));
 
@@ -84,7 +86,8 @@ const _Chart = (
         <Title metricId={metricId} noChoiceParams={props.data.noChoiceParams} />
       </div>
       <div id="config-buttons-div">
-        <DeleteButton metricId={metricId} restrictions={restrictions} />
+        <DeleteButton metricId={metricId} spec={spec} />
+        <SwitchXAxisButton metricId={metricId} spec={spec} />
         {selectDropdowns}
         {splitByButtons}
       </div>
