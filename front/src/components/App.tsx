@@ -10,7 +10,8 @@ import { HashRouter, Route, Switch } from "react-router-dom";
 import { RouteConfig } from "react-router-config";
 import MetricIdInput from "./MetricIdInput";
 import * as _ from "lodash";
-import { paramsHash, Point } from "../models/Point";
+import { Point } from "../models/Point";
+import stringify from "json-stable-stringify";
 
 const configsToCharts = (
   cache: { [metricId: string]: Point[] },
@@ -30,8 +31,7 @@ const configsToCharts = (
     const data = calculate(points, xAccessor);
     return (
       <Chart
-        key={`${metricId}::${paramsHash(restrictions)}`}
-        metricId={metricId}
+        key={stringify(spec)}
         width={chartWidth}
         height={chartHeight}
         data={data}

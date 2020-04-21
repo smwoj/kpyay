@@ -13,6 +13,7 @@ import * as mock_data from "../mock_data/data";
 import { DefaultDict } from "../lib/collections/DefaultDict";
 import { BFSet } from "../lib/collections/BFSet";
 import * as _ from "lodash";
+import stringify from "json-stable-stringify";
 
 const INIT_STATE: AppState = {
   cache: {
@@ -21,12 +22,12 @@ const INIT_STATE: AppState = {
     beta: mock_data.SLOTHS_VS_PASTRY_FSCORES,
   },
   configs: new DefaultDict<BFSet<ChartSpec>>(() => new BFSet<ChartSpec>(), {
-    // alfa: new BFSet([
-    //   { xAccessor: "version", restrictions: {} },
-    //   { xAccessor: "version", restrictions: { team: "green" } },
-    // ] as ChartSpec[]),
     beta: new BFSet([
-      { xAccessor: "timestamp", restrictions: { team: "foxtrot" } },
+      {
+        xAccessor: "timestamp",
+        metricId: "beta",
+        restrictions: { team: "foxtrot" },
+      },
     ] as ChartSpec[]),
   }),
   last_message: "", // todo: make it expire
@@ -38,23 +39,23 @@ const reduceInit = (state: AppState, action: Action): AppState => {
 };
 
 const reduceDeleteChart = (state: AppState, action: IDeleteChart): AppState => {
-  const { metricId, spec } = action.payload;
-  console.log(`DELETING CHART ${metricId} with spec ${JSON.stringify(spec)}`);
+  const { spec } = action.payload;
+  console.log(`DELETING CHART ${spec.metricId} with spec ${stringify(spec)}`);
 
   const newConfigs = _.cloneDeep(state.configs);
-  newConfigs.get(metricId).remove(spec);
+  newConfigs.get(spec.metricId).remove(spec);
   return { ...state, configs: newConfigs };
 };
 
 const reduceAddRestriction = (state: AppState, action: IRestrict): AppState => {
-  const { metricId, spec, restrictedParam, restrictedToValue } = action.payload;
+  const { spec, restrictedParam, restrictedToValue } = action.payload;
   console.log(
-    `RESTRICTING CHART! ${metricId}, spec: ${JSON.stringify(
+    `RESTRICTING CHART! ${spec.metricId}, spec: ${stringify(
       spec
     )} with ${restrictedParam}=${restrictedToValue}`
   );
   const newConfigs = _.cloneDeep(state.configs);
-  const specsSet = newConfigs.get(metricId);
+  const specsSet = newConfigs.get(spec.metricId);
 
   specsSet.remove(spec);
   const newSpec = _.cloneDeep(spec);
@@ -65,13 +66,13 @@ const reduceAddRestriction = (state: AppState, action: IRestrict): AppState => {
 };
 
 const reduceSplitBy = (state: AppState, action: ISplitBy): AppState => {
-  const { metricId, variants, spec, param } = action.payload;
+  const { variants, spec, param } = action.payload;
   console.log(
-    `SPLITTING CHART  ${metricId}! Creating new chart for each variant of ${param}.`
+    `SPLITTING CHART  ${spec.metricId}! Creating new chart for each variant of ${param}.`
   );
   const newConfigs = _.cloneDeep(state.configs);
 
-  const newSpecs = newConfigs.get(metricId);
+  const newSpecs = newConfigs.get(spec.metricId);
   newSpecs.remove(spec);
   // ^^ rm the original chart on which "split by" was clicked...
   // ...and add new versions supplied with one variant each
@@ -93,7 +94,9 @@ const reduceFetchedPoints = (
   console.log(`FETCHED METRIC ${metricId}! Adding it's point's to state.`);
 
   const newConfigs = _.cloneDeep(state.configs);
-  newConfigs.get(metricId).add({ xAccessor: "timestamp", restrictions: {} });
+  newConfigs
+    .get(metricId)
+    .add({ metricId, xAccessor: "timestamp", restrictions: {} });
 
   const newCache = { ...state.cache };
   newCache[metricId] = points;
@@ -115,15 +118,15 @@ const reduceFailedToFetchPoints = (
 };
 
 const reduceSwitchXAxis = (state: AppState, action: ISwitchXAxis): AppState => {
-  const { metricId, spec } = action.payload;
-  console.log(`Switching accessor for spec ${JSON.stringify(spec)}`);
+  const { spec } = action.payload;
+  console.log(`Switching accessor for spec ${stringify(spec)}`);
 
   const newConfigs = _.cloneDeep(state.configs);
-  newConfigs.get(metricId).remove(spec);
+  newConfigs.get(spec.metricId).remove(spec);
 
   const newSpec = _.cloneDeep(spec);
   newSpec.xAccessor = "timestamp" === spec.xAccessor ? "version" : "timestamp";
-  newConfigs.get(metricId).add(newSpec);
+  newConfigs.get(spec.metricId).add(newSpec);
 
   return { ...state, configs: newConfigs };
 };

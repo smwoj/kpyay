@@ -12,7 +12,6 @@ import {
 import { ChartSpec } from "../../store/models";
 
 interface DeleteButtonProps {
-  metricId: string;
   spec: ChartSpec;
 }
 const _DeleteButton = (
@@ -20,11 +19,7 @@ const _DeleteButton = (
     dispatch: (a: Action) => void;
   }
 ) => (
-  <Button
-    onClick={() =>
-      props.dispatch(deleteChartAction(props.metricId, props.spec))
-    }
-  >
+  <Button onClick={() => props.dispatch(deleteChartAction(props.spec))}>
     delete
   </Button>
 );
@@ -34,7 +29,6 @@ export const DeleteButton: React.FunctionComponent<DeleteButtonProps> = connect(
 );
 
 interface SwitchXAxisButtonProps {
-  metricId: string;
   spec: ChartSpec;
 }
 const _SwitchXAxisButton = (
@@ -45,11 +39,7 @@ const _SwitchXAxisButton = (
   const otherXAccessor =
     "timestamp" === props.spec.xAccessor ? "version" : "timestamp";
   return (
-    <Button
-      onClick={() =>
-        props.dispatch(switchXAxisAction(props.metricId, props.spec))
-      }
-    >
+    <Button onClick={() => props.dispatch(switchXAxisAction(props.spec))}>
       {`${otherXAccessor} on x-axis`}
     </Button>
   );
@@ -91,18 +81,17 @@ const _SelectDropdown = (
   props: {
     paramName: string;
     variants: string[];
-    metricId: string;
     spec: ChartSpec;
   } & {
     dispatch: (a: Action) => void;
   }
 ): JSX.Element => {
-  const { paramName, metricId, spec } = props;
+  const { paramName, spec } = props;
   const text = `select ${props.paramName}`;
   const variantsToExecutors = _.object(
     props.variants.map((variant) => [
       variant,
-      () => props.dispatch(restrictAction(metricId, spec, paramName, variant)),
+      () => props.dispatch(restrictAction(spec, paramName, variant)),
     ])
   );
   return (
@@ -123,18 +112,15 @@ const _SplitByButton = (
   props: {
     paramName: string;
     variants: string[];
-    metricId: string;
     spec: ChartSpec;
   } & {
     dispatch: (a: Action) => void;
   }
 ): JSX.Element => {
-  const { paramName, variants, metricId, spec } = props;
+  const { paramName, variants, spec } = props;
   return (
     <Button
-      onClick={() =>
-        props.dispatch(splitByAction(metricId, spec, paramName, variants))
-      }
+      onClick={() => props.dispatch(splitByAction(spec, paramName, variants))}
     >{`split by ${paramName}`}</Button>
   );
 };

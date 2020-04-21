@@ -1,5 +1,6 @@
 import { Version } from "../models/Version";
 import { Point } from "../models/Point";
+import { paramsHash } from "../components/charts/calculate";
 
 describe("Point", () => {
   it("correctly hashes params ", () => {
@@ -11,7 +12,7 @@ describe("Point", () => {
       new Date("2012-04-14T00:02:30")
     );
 
-    expect(point.paramsHash()).toEqual("team=burgery, wege=nie");
+    expect(paramsHash(point._params)).toEqual("team=burgery, wege=nie");
   });
 
   it("provides correct ordering", () => {

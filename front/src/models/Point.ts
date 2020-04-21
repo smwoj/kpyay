@@ -1,13 +1,6 @@
 import { Version } from "./Version";
 import { RawPoint } from "../store/models";
 
-export const paramsHash = (params: { [param: string]: string }): string => {
-  return Object.keys(params)
-    .sort()
-    .map((key) => `${key}=${params[key]}`)
-    .join(", ");
-};
-
 export class Point {
   readonly _value: number;
   readonly _version: Version | null;
@@ -40,10 +33,6 @@ export class Point {
     this._params = params;
     this._timestamp = timestamp;
     this._postedTimestamp = postedTimestamp;
-  }
-
-  paramsHash(): string {
-    return paramsHash(this._params);
   }
 
   static ascVersion(left: Point, right: Point): number {

@@ -60,11 +60,10 @@ const _Chart = (
     width: number;
     height: number;
     data: ChartData;
-    metricId: string;
     spec: ChartSpec;
   } & { dispatch: (a: Action) => void }
 ) => {
-  const { metricId, spec } = props;
+  const { spec } = props;
 
   const selectDropdowns = Object.entries(
     props.data.paramsToVariants
@@ -73,7 +72,6 @@ const _Chart = (
       key={param}
       paramName={param}
       variants={variants}
-      metricId={metricId}
       spec={spec}
     />
   ));
@@ -85,7 +83,6 @@ const _Chart = (
       key={param}
       paramName={param}
       variants={variants}
-      metricId={metricId}
       spec={spec}
     />
   ));
@@ -98,12 +95,15 @@ const _Chart = (
   return (
     <div className="chartBox">
       <div className="chart-title-div">
-        <Title metricId={metricId} noChoiceParams={props.data.noChoiceParams} />
+        <Title
+          metricId={spec.metricId}
+          noChoiceParams={props.data.noChoiceParams}
+        />
       </div>
       <div id="config-buttons-div">
         {/*todo: wywal do hoverowalnego komponentu */}
-        <DeleteButton metricId={metricId} spec={spec} />
-        <SwitchXAxisButton metricId={metricId} spec={spec} />
+        <DeleteButton spec={spec} />
+        <SwitchXAxisButton spec={spec} />
         {selectDropdowns}
         {splitByButtons}
       </div>

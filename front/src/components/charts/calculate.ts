@@ -1,7 +1,7 @@
 import * as __ from "lodash";
 import * as _ from "underscore";
 import { DefaultDict } from "../../lib/collections/DefaultDict";
-import { paramsHash, Point } from "../../models/Point";
+import { Point } from "../../models/Point";
 
 type NoChoiceParams = { [param: string]: string };
 type ParamVariants = { [param: string]: string[] };
@@ -39,6 +39,12 @@ export const partitionByVariants = (paramsToVariants: {
   );
   return [noChoice, withVariants];
 };
+export const paramsHash = (params: { [param: string]: string }): string => {
+  return Object.keys(params)
+    .sort()
+    .map((key) => `${key}=${params[key]}`)
+    .join(", ");
+};
 
 export const calculate = (
   points: Point[],
@@ -72,7 +78,7 @@ export const calculate = (
   points.forEach((p) => {
     hashes.add(relevantParamsHash(p));
   });
-  const allValues = points.map((p) => p._value);
+
   return {
     data: __.map(groups.data, (ps, xacc) => {
       const data: any = _.object(

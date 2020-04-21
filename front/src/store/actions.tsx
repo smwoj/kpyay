@@ -14,13 +14,11 @@ export const ActionTypes = {
 
 export interface IDeleteChart extends Action {
   payload: {
-    metricId: string;
     spec: ChartSpec;
   };
 }
 export interface IRestrict extends Action {
   payload: {
-    metricId: string;
     spec: ChartSpec;
     restrictedParam: string;
     restrictedToValue: string;
@@ -29,7 +27,6 @@ export interface IRestrict extends Action {
 
 export interface ISplitBy extends Action {
   payload: {
-    metricId: string;
     spec: ChartSpec;
     param: string;
     variants: string[];
@@ -50,7 +47,6 @@ export interface IFailedToFetchPoints extends Action {
 }
 export interface ISwitchXAxis extends Action {
   payload: {
-    metricId: string;
     spec: ChartSpec;
   };
 }
@@ -59,37 +55,32 @@ export const initStoreAction = (): Action => {
   return { type: ActionTypes.INIT_STORE };
 };
 
-export const deleteChartAction = (
-  metricId: string,
-  spec: ChartSpec
-): IDeleteChart => {
+export const deleteChartAction = (spec: ChartSpec): IDeleteChart => {
   return {
     type: ActionTypes.DELETE_CHART,
-    payload: { metricId, spec: spec },
+    payload: { spec },
   };
 };
 
 export const restrictAction = (
-  metricId: string,
   spec: ChartSpec,
   restrictedParam: string,
   restrictedToValue: string
 ): IRestrict => {
   return {
     type: ActionTypes.ADD_RESTRICTION,
-    payload: { metricId, spec: spec, restrictedParam, restrictedToValue },
+    payload: { spec, restrictedParam, restrictedToValue },
   };
 };
 
 export const splitByAction = (
-  metricId: string,
   spec: ChartSpec,
   param: string,
   variants: string[]
 ): ISplitBy => {
   return {
     type: ActionTypes.SPLIT_BY,
-    payload: { metricId, spec, param, variants },
+    payload: { spec, param, variants },
   };
 };
 
@@ -113,14 +104,10 @@ export const failedToFetchPointsAction = (
   };
 };
 
-export const switchXAxisAction = (
-  metricId: string,
-  spec: ChartSpec
-): ISwitchXAxis => {
+export const switchXAxisAction = (spec: ChartSpec): ISwitchXAxis => {
   return {
     type: ActionTypes.SWITCH_X_AXIS,
     payload: {
-      metricId,
       spec,
     },
   };

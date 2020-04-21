@@ -11,6 +11,7 @@ export interface RawPoint {
 }
 
 export type ChartSpec = {
+  metricId: string;
   xAccessor: "timestamp" | "version";
   restrictions: { [param: string]: string };
 };
