@@ -72,7 +72,7 @@ export const calculate = (
   points.forEach((p) => {
     hashes.add(relevantParamsHash(p));
   });
-
+  const allValues = points.map((p) => p._value);
   return {
     data: __.map(groups.data, (ps, xacc) => {
       const data: any = _.object(

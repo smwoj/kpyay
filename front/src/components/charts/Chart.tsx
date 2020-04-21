@@ -8,7 +8,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import * as _ from "underscore";
+import * as _ from "lodash";
 import { pickColour } from "../../lib/colourPicker";
 import { CustomizedAxisTick } from "./AxisTick";
 import {
@@ -48,6 +48,11 @@ const smartFormatter = (fullValue: number, name: string) => {
   } else {
     return [`${name}: ${value}`];
   }
+};
+const calcXTicksInterval = (maxTicks: number): number => {
+  // ad-hoc method to have xTicks in somewhat reasonable intervals
+  // it's not number of ticks!
+  return Math.floor(maxTicks / 12);
 };
 
 const _Chart = (
@@ -96,6 +101,7 @@ const _Chart = (
         <Title metricId={metricId} noChoiceParams={props.data.noChoiceParams} />
       </div>
       <div id="config-buttons-div">
+        {/*todo: wywal do hoverowalnego komponentu */}
         <DeleteButton metricId={metricId} spec={spec} />
         <SwitchXAxisButton metricId={metricId} spec={spec} />
         {selectDropdowns}
@@ -113,12 +119,14 @@ const _Chart = (
             height={50}
             tick={CustomizedAxisTick}
             tickSize={3}
-            interval={2}
+            interval={calcXTicksInterval(props.data.data.length)}
           />
-          {/*  TODO: cwanie policz interval żeby zawsze było 5-10 ticków*/}
-          {/*  TODO: y range policz */}
-          <YAxis type="number" domain={[0.5, 1.1]} />
-          {/*TODO: ^^ calculate in calculate*/}
+          <YAxis
+            type="number"
+            // domain={[0.5, 1.1]}
+            // not really happy with the default domain calculation,
+            // but taking the 0% effort for 50% satisfaction trade-off
+          />
           <CartesianGrid stroke="#eeeeee" strokeDasharray="5 5" />
           {lines}
           {legend}

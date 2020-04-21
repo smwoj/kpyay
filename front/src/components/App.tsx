@@ -51,7 +51,6 @@ const Spa = (
   const chartWidth = width >= 600 ? 600 : width;
   const chartHeight = height >= 300 ? 300 : height;
 
-  console.log(props.configs);
   const charts = _.flatMap([...props.configs], ([metricId, chartSpecs]) => {
     return configsToCharts(
       props.cache,
