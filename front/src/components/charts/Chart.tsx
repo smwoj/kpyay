@@ -40,6 +40,16 @@ const Title = (props: {
   return <h1>{props.metricId + title}</h1>;
 };
 
+const smartFormatter = (fullValue: number, name: string) => {
+  const value = fullValue.toFixed(3);
+  if (name === "") {
+    //  replaces ugly tooltip ': 0.9234234234' for charts with empty data key (only 1 line)
+    return [value];
+  } else {
+    return [`${name}: ${value}`];
+  }
+};
+
 const _Chart = (
   props: {
     width: number;
@@ -106,12 +116,13 @@ const _Chart = (
             interval={2}
           />
           {/*  TODO: cwanie policz interval żeby zawsze było 5-10 ticków*/}
+          {/*  TODO: y range policz */}
           <YAxis type="number" domain={[0.5, 1.1]} />
           {/*TODO: ^^ calculate in calculate*/}
           <CartesianGrid stroke="#eeeeee" strokeDasharray="5 5" />
           {lines}
           {legend}
-          <Tooltip />
+          <Tooltip formatter={smartFormatter} />
         </LineChart>
       </div>
     </div>

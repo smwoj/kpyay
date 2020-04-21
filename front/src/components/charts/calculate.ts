@@ -48,7 +48,7 @@ export const calculate = (
   const group: (p: Point) => string | undefined =
     xAccessor === "version"
       ? (p: Point) => p._version?.toString()
-      : (p: Point) => p._timestamp.toISOString();
+      : (p: Point) => p._timestamp.toISOString().slice(0, 19).replace("T", " ");
   const variants = new DefaultDict<Set<string>>(() => new Set<string>());
 
   points.forEach((p) => {
