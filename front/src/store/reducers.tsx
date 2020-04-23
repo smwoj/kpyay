@@ -8,6 +8,9 @@ import {
   IFetchedPoints,
   IFailedToFetchPoints,
   ISwitchXAxis,
+  ISavedView,
+  IShowMessage,
+  IFailedToSaveView,
 } from "./actions";
 import * as mock_data from "../mock_data/data";
 import { DefaultDict } from "../lib/collections/DefaultDict";
@@ -130,6 +133,30 @@ const reduceSwitchXAxis = (state: AppState, action: ISwitchXAxis): AppState => {
 
   return { ...state, configs: newConfigs };
 };
+// TODO: lots of these reducers can be removed and replaced with simply showMessage
+
+const reduceSavedView = (state: AppState, action: ISavedView): AppState => {
+  const { viewName } = action.payload;
+  const msg = `Saved view: '${viewName}'`;
+  console.log(msg);
+  return { ...state, last_message: msg };
+};
+
+const reduceShowMessage = (state: AppState, action: IShowMessage): AppState => {
+  const { message } = action.payload;
+  console.log(`Showing message: ${message}`);
+  return { ...state, last_message: message };
+};
+
+const reduceFailedToSaveView = (
+  state: AppState,
+  action: IFailedToSaveView
+): AppState => {
+  const { error, viewName } = action.payload;
+  const msg = `Couldn't save view '${viewName}'. Error: ${error}`;
+  console.log(msg);
+  return { ...state, last_message: msg };
+};
 
 const reducersByActionType = (() => {
   const reducers: { [actionType: string]: Reducer } = {};
@@ -140,6 +167,9 @@ const reducersByActionType = (() => {
   reducers[ActionTypes.FETCHED_POINTS] = reduceFetchedPoints;
   reducers[ActionTypes.FAILED_TO_FETCH_POINTS] = reduceFailedToFetchPoints;
   reducers[ActionTypes.SWITCH_X_AXIS] = reduceSwitchXAxis;
+  reducers[ActionTypes.SAVED_VIEW] = reduceSavedView;
+  reducers[ActionTypes.FAILED_TO_SAVE_VIEW] = reduceFailedToSaveView;
+  reducers[ActionTypes.SHOW_MESSAGE] = reduceShowMessage;
   return reducers;
 })();
 

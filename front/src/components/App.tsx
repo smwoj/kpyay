@@ -12,6 +12,7 @@ import MetricIdInput from "./MetricIdInput";
 import * as _ from "lodash";
 import { Point } from "../models/Point";
 import stringify from "json-stable-stringify";
+import { SaveViewButton } from "./viewPersistance/PersistViewButton";
 
 const configsToCharts = (
   cache: { [metricId: string]: Point[] },
@@ -68,6 +69,7 @@ const Spa = (
         <p>{props.last_message}</p>
         <div className="example-input">
           <MetricIdInput />
+          <SaveViewButton />
         </div>
         <div>{charts}</div>
       </header>
