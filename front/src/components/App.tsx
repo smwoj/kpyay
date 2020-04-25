@@ -91,15 +91,19 @@ const Spa = (
   const chartWidth = width >= 600 ? 600 : width;
   const chartHeight = height >= 300 ? 300 : height;
 
-  const charts = _.flatMap([...props.configs], ([metricId, chartSpecs]) => {
-    return configsToCharts(
-      props.cache,
-      [...chartSpecs],
-      metricId,
-      chartWidth,
-      chartHeight
-    );
-  });
+  const specsByMetric = _.groupBy([...props.configs], (cfg) => cfg.metricId);
+  const charts = _.flatMap(
+    Object.entries(specsByMetric),
+    ([metricId, chartSpecs]) => {
+      return configsToCharts(
+        props.cache,
+        [...chartSpecs],
+        metricId,
+        chartWidth,
+        chartHeight
+      );
+    }
+  );
 
   return (
     <div className="app-div">

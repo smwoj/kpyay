@@ -21,7 +21,6 @@ import { ChartData } from "./calculate";
 import { connect } from "react-redux";
 import { Action } from "redux";
 import { ChartSpec } from "../../store/models";
-import stringify from "json-stable-stringify";
 
 const Title = (props: {
   metricId: string;

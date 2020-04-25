@@ -14,7 +14,6 @@ import {
   IFetchedConfig,
 } from "./actions";
 import * as mock_data from "../mock_data/data";
-import { DefaultDict } from "../lib/collections/DefaultDict";
 import { BFSet } from "../lib/collections/BFSet";
 import * as _ from "lodash";
 import stringify from "json-stable-stringify";
@@ -22,18 +21,16 @@ import stringify from "json-stable-stringify";
 const INIT_STATE: AppState = {
   cache: {
     // "dogs-muffins f-score": mock_data.DOGS_VS_MUFFINS_FSCORES,
-    alfa: mock_data.DOGS_VS_MUFFINS_FSCORES,
+    // alfa: mock_data.DOGS_VS_MUFFINS_FSCORES,
     beta: mock_data.SLOTHS_VS_PASTRY_FSCORES,
   },
-  configs: new DefaultDict<BFSet<ChartSpec>>(() => new BFSet<ChartSpec>(), {
-    beta: new BFSet([
-      {
-        xAccessor: "timestamp",
-        metricId: "beta",
-        restrictions: { team: "foxtrot" },
-      },
-    ] as ChartSpec[]),
-  }),
+  configs: new BFSet([
+    {
+      xAccessor: "timestamp",
+      metricId: "beta",
+      restrictions: { team: "foxtrot" },
+    },
+  ] as ChartSpec[]),
   last_message: "", // todo: make it expire
 };
 
@@ -47,7 +44,7 @@ const reduceDeleteChart = (state: AppState, action: IDeleteChart): AppState => {
   console.log(`DELETING CHART ${spec.metricId} with spec ${stringify(spec)}`);
 
   const newConfigs = _.cloneDeep(state.configs);
-  newConfigs.get(spec.metricId).remove(spec);
+  newConfigs.remove(spec);
   return { ...state, configs: newConfigs };
 };
 
@@ -58,15 +55,14 @@ const reduceAddRestriction = (state: AppState, action: IRestrict): AppState => {
       spec
     )} with ${restrictedParam}=${restrictedToValue}`
   );
-  const newConfigs = _.cloneDeep(state.configs);
-  const specsSet = newConfigs.get(spec.metricId);
+  const specsSet = _.cloneDeep(state.configs);
 
   specsSet.remove(spec);
   const newSpec = _.cloneDeep(spec);
   newSpec.restrictions[restrictedParam] = restrictedToValue;
   specsSet.add(newSpec);
 
-  return { ...state, configs: newConfigs };
+  return { ...state, configs: specsSet };
 };
 
 const reduceSplitBy = (state: AppState, action: ISplitBy): AppState => {
@@ -74,9 +70,8 @@ const reduceSplitBy = (state: AppState, action: ISplitBy): AppState => {
   console.log(
     `SPLITTING CHART  ${spec.metricId}! Creating new chart for each variant of ${param}.`
   );
-  const newConfigs = _.cloneDeep(state.configs);
+  const newSpecs = _.cloneDeep(state.configs);
 
-  const newSpecs = newConfigs.get(spec.metricId);
   newSpecs.remove(spec);
   // ^^ rm the original chart on which "split by" was clicked...
   // ...and add new versions supplied with one variant each
@@ -86,7 +81,7 @@ const reduceSplitBy = (state: AppState, action: ISplitBy): AppState => {
     newSpecs.add(newSpec);
   });
 
-  return { ...state, configs: newConfigs };
+  return { ...state, configs: newSpecs };
 };
 
 const reduceFetchedPoints = (
@@ -98,9 +93,7 @@ const reduceFetchedPoints = (
   console.log(`FETCHED METRIC ${metricId}! Adding it's point's to state.`);
 
   const newConfigs = _.cloneDeep(state.configs);
-  newConfigs
-    .get(metricId)
-    .add({ metricId, xAccessor: "timestamp", restrictions: {} });
+  newConfigs.add({ metricId, xAccessor: "timestamp", restrictions: {} });
 
   const newCache = { ...state.cache };
   newCache[metricId] = points;
@@ -126,11 +119,11 @@ const reduceSwitchXAxis = (state: AppState, action: ISwitchXAxis): AppState => {
   console.log(`Switching accessor for spec ${stringify(spec)}`);
 
   const newConfigs = _.cloneDeep(state.configs);
-  newConfigs.get(spec.metricId).remove(spec);
+  newConfigs.remove(spec);
 
   const newSpec = _.cloneDeep(spec);
   newSpec.xAccessor = "timestamp" === spec.xAccessor ? "version" : "timestamp";
-  newConfigs.get(spec.metricId).add(newSpec);
+  newConfigs.add(newSpec);
 
   return { ...state, configs: newConfigs };
 };

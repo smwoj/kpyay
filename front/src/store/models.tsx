@@ -1,4 +1,3 @@
-import { DefaultDict } from "../lib/collections/DefaultDict";
 import { BFSet } from "../lib/collections/BFSet";
 import { Point } from "../models/Point";
 
@@ -18,6 +17,6 @@ export type ChartSpec = {
 
 export interface AppState {
   cache: { [metricId: string]: Point[] };
-  configs: DefaultDict<BFSet<ChartSpec>>;
+  configs: BFSet<ChartSpec>;
   last_message: string;
 }

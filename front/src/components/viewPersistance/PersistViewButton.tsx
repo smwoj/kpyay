@@ -8,12 +8,11 @@ import {
 import { connect } from "react-redux";
 import * as React from "react";
 import { AppState, ChartSpec } from "../../store/models";
-import { DefaultDict } from "../../lib/collections/DefaultDict";
 import { BFSet } from "../../lib/collections/BFSet";
 import { saveView } from "./api";
 
 interface SaveViewButtonProps {
-  configs: DefaultDict<BFSet<ChartSpec>>;
+  configs: BFSet<ChartSpec>;
   currentViewName?: string;
 }
 

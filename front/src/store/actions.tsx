@@ -1,7 +1,6 @@
 import { Action } from "redux";
 import { ChartSpec } from "./models";
 import { Point } from "../models/Point";
-import { DefaultDict } from "../lib/collections/DefaultDict";
 import { BFSet } from "../lib/collections/BFSet";
 
 export const ActionTypes = {
@@ -162,13 +161,13 @@ export const switchXAxisAction = (spec: ChartSpec): ISwitchXAxis => {
 
 export interface IFetchedConfig extends Action {
   payload: {
-    config: DefaultDict<BFSet<ChartSpec>>;
+    config: BFSet<ChartSpec>;
     viewName: string;
   };
 }
 export const fetchedConfigAction = (
   viewName: string,
-  config: DefaultDict<BFSet<ChartSpec>>
+  config: BFSet<ChartSpec>
 ): IFetchedConfig => {
   return {
     type: ActionTypes.FETCHED_CONFIG,
