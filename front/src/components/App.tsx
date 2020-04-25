@@ -45,7 +45,6 @@ const configsToCharts = (
       );
     }
     const data = calculate(points, xAccessor);
-    console.log(`${stringify(specs)} -> ${data.data.length}`);
     return (
       <Chart
         key={stringify(spec)}
@@ -108,6 +107,7 @@ const Spa = (
     <div className="app-div">
       <header className="App-header">
         {viewHeader}
+        {/*TODO: zrób expiring message box*/}
         <p>{props.last_message}</p>
         <div className="example-input">
           <MetricIdInput />
