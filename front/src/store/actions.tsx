@@ -1,6 +1,8 @@
 import { Action } from "redux";
 import { ChartSpec } from "./models";
 import { Point } from "../models/Point";
+import { DefaultDict } from "../lib/collections/DefaultDict";
+import { BFSet } from "../lib/collections/BFSet";
 
 export const ActionTypes = {
   INIT_STORE: "INIT_STORE",
@@ -13,6 +15,7 @@ export const ActionTypes = {
   SHOW_MESSAGE: "SHOW_MESSAGE",
   SAVED_VIEW: "SAVED_VIEW",
   FAILED_TO_SAVE_VIEW: "FAILED_TO_SAVE_VIEW",
+  FETCHED_CONFIG: "FETCHED_CONFIG",
 };
 
 export interface IDeleteChart extends Action {
@@ -153,6 +156,25 @@ export const switchXAxisAction = (spec: ChartSpec): ISwitchXAxis => {
     type: ActionTypes.SWITCH_X_AXIS,
     payload: {
       spec,
+    },
+  };
+};
+
+export interface IFetchedConfig extends Action {
+  payload: {
+    config: DefaultDict<BFSet<ChartSpec>>;
+    viewName: string;
+  };
+}
+export const fetchedConfigAction = (
+  viewName: string,
+  config: DefaultDict<BFSet<ChartSpec>>
+): IFetchedConfig => {
+  return {
+    type: ActionTypes.FETCHED_CONFIG,
+    payload: {
+      config,
+      viewName,
     },
   };
 };

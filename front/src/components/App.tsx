@@ -8,11 +8,19 @@ import { calculate } from "./charts/calculate";
 import "./../styles.css";
 import { HashRouter, Route, Switch } from "react-router-dom";
 import { RouteConfig } from "react-router-config";
-import MetricIdInput from "./MetricIdInput";
+import MetricIdInput, { getMetricData } from "./MetricIdInput";
 import * as _ from "lodash";
 import { Point } from "../models/Point";
 import stringify from "json-stable-stringify";
 import { SaveViewButton } from "./viewPersistance/PersistViewButton";
+import { loadView } from "./viewPersistance/api";
+import { useEffect } from "react";
+import {
+  failedToFetchPointsAction,
+  fetchedConfigAction,
+  fetchedPointsAction,
+  showMessageAction,
+} from "../store/actions";
 
 const configsToCharts = (
   cache: { [metricId: string]: Point[] },
@@ -48,6 +56,37 @@ const Spa = (
     match: any;
   }
 ) => {
+  // const viewName = props.match.url.slice(1);
+  // const dispatch = props.dispatch;
+  // useEffect(() => {
+  //   console.log(`Fetching data for view: ${viewName}`);
+  //   loadView(viewName).then(
+  //     (cfg) => {
+  //       Object.keys(cfg.data).forEach((metricId) => {
+  //         // todo: wywal duplikację
+  //         getMetricData(metricId).then(
+  //           (points) => {
+  //             console.log(`Got ${points.length} points for ${metricId}`);
+  //             props.dispatch(fetchedPointsAction(metricId, points));
+  //           },
+  //           (err) => {
+  //             console.log("NO BUENO:", err);
+  //             props.dispatch(
+  //               failedToFetchPointsAction(metricId, err.toString())
+  //             );
+  //           }
+  //         );
+  //       });
+  //       dispatch(fetchedConfigAction(viewName, cfg));
+  //     },
+  //     (err) => {
+  //       const msg = `Couldn't fetch view: ${viewName}, error: ${err.toString()}`;
+  //       console.log(msg);
+  //       dispatch(showMessageAction(msg));
+  //     }
+  //   );
+  // }, [viewName]);
+
   const [width, height] = useWindowSize();
   const chartWidth = width >= 600 ? 600 : width;
   const chartHeight = height >= 300 ? 300 : height;
@@ -65,7 +104,8 @@ const Spa = (
   return (
     <div className="app-div">
       <header className="App-header">
-        {/*<h1>{"slug: " + props.match.url}</h1>*/}
+        {/*<h1>{viewName ? "View: " + viewName : "(unnamed view)"}</h1>*/}
+        {/*wrzuć to w reduxa i ustawiaj jeśli ściąganie pykło*/}
         <p>{props.last_message}</p>
         <div className="example-input">
           <MetricIdInput />
@@ -88,13 +128,9 @@ const App = connect(mapStateToProps)(Spa);
 
 export const routes: RouteConfig[] = [
   {
-    path: "/",
+    path: "/:slug",
     component: () => <App />,
   },
-  // {
-  //   path: "/todo",
-  //   component: () => <TodoPage />,
-  // },
 ];
 
 const route = (

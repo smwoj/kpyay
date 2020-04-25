@@ -16,7 +16,7 @@ const MOCK_DATA: { [metricId: string]: Point[] } = {
   "dogs-muffins f-score": mock_data.DOGS_VS_MUFFINS_FSCORES,
 };
 
-async function getMetricData(metricId: string): Promise<Point[]> {
+export async function getMetricData(metricId: string): Promise<Point[]> {
   const points = MOCK_DATA[metricId];
   if (points === undefined) {
     console.log("bad stuff happened, can't fetch data for " + metricId);

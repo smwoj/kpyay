@@ -11,6 +11,7 @@ import {
   ISavedView,
   IShowMessage,
   IFailedToSaveView,
+  IFetchedConfig,
 } from "./actions";
 import * as mock_data from "../mock_data/data";
 import { DefaultDict } from "../lib/collections/DefaultDict";
@@ -157,6 +158,21 @@ const reduceFailedToSaveView = (
   console.log(msg);
   return { ...state, last_message: msg };
 };
+const reduceFetchedConfig = (
+  state: AppState,
+  action: IFetchedConfig
+): AppState => {
+  const { config, viewName } = action.payload;
+  const msg = `Setting fetched config for view ${viewName}: ${stringify(
+    config
+  )}`;
+  console.log(msg);
+  return {
+    ...state,
+    configs: config,
+    last_message: `Loaded config '${viewName}'.`,
+  };
+};
 
 const reducersByActionType = (() => {
   const reducers: { [actionType: string]: Reducer } = {};
@@ -170,6 +186,7 @@ const reducersByActionType = (() => {
   reducers[ActionTypes.SAVED_VIEW] = reduceSavedView;
   reducers[ActionTypes.FAILED_TO_SAVE_VIEW] = reduceFailedToSaveView;
   reducers[ActionTypes.SHOW_MESSAGE] = reduceShowMessage;
+  reducers[ActionTypes.FETCHED_CONFIG] = reduceFetchedConfig;
   return reducers;
 })();
 
