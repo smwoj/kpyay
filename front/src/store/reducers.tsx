@@ -11,7 +11,7 @@ import {
   ISavedView,
   IShowMessage,
   IFailedToSaveView,
-  IFetchedConfig,
+  ISetConfig,
 } from "./actions";
 import * as mock_data from "../mock_data/data";
 import { BFSet } from "../lib/collections/BFSet";
@@ -19,17 +19,18 @@ import * as _ from "lodash";
 import stringify from "json-stable-stringify";
 
 const INIT_STATE: AppState = {
+  viewName: null,
   cache: {
     // "dogs-muffins f-score": mock_data.DOGS_VS_MUFFINS_FSCORES,
     // alfa: mock_data.DOGS_VS_MUFFINS_FSCORES,
-    beta: mock_data.SLOTHS_VS_PASTRY_FSCORES,
+    // beta: mock_data.SLOTHS_VS_PASTRY_FSCORES,
   },
   configs: new BFSet([
-    {
-      xAccessor: "timestamp",
-      metricId: "beta",
-      restrictions: { team: "foxtrot" },
-    },
+    //   {
+    //     xAccessor: "timestamp",
+    //     metricId: "beta",
+    //     restrictions: { team: "foxtrot" },
+    //   },
   ] as ChartSpec[]),
   last_message: "", // todo: make it expire
 };
@@ -99,9 +100,9 @@ const reduceFetchedPoints = (
   newCache[metricId] = points;
 
   return {
+    ...state,
     configs: newConfigs,
     cache: newCache,
-    last_message: state.last_message,
   };
 };
 
@@ -151,19 +152,15 @@ const reduceFailedToSaveView = (
   console.log(msg);
   return { ...state, last_message: msg };
 };
-const reduceFetchedConfig = (
-  state: AppState,
-  action: IFetchedConfig
-): AppState => {
+const reduceFetchedConfig = (state: AppState, action: ISetConfig): AppState => {
   const { config, viewName } = action.payload;
-  const msg = `Setting fetched config for view ${viewName}: ${stringify(
-    config
-  )}`;
+  const view = viewName ? `view ${viewName}` : "empty view";
+  const msg = `Setting fetched config for ${view}: ${stringify(config)}`;
   console.log(msg);
   return {
     ...state,
     configs: config,
-    last_message: `Loaded config '${viewName}'.`,
+    last_message: viewName ? `Loaded config '${viewName}'.` : "",
   };
 };
 

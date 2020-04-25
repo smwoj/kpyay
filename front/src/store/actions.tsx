@@ -159,16 +159,16 @@ export const switchXAxisAction = (spec: ChartSpec): ISwitchXAxis => {
   };
 };
 
-export interface IFetchedConfig extends Action {
+export interface ISetConfig extends Action {
   payload: {
     config: BFSet<ChartSpec>;
-    viewName: string;
+    viewName: string | null;
   };
 }
-export const fetchedConfigAction = (
-  viewName: string,
+export const setConfigAction = (
+  viewName: string | null,
   config: BFSet<ChartSpec>
-): IFetchedConfig => {
+): ISetConfig => {
   return {
     type: ActionTypes.FETCHED_CONFIG,
     payload: {

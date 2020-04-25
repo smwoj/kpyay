@@ -16,6 +16,7 @@ export type ChartSpec = {
 };
 
 export interface AppState {
+  viewName: string | null;
   cache: { [metricId: string]: Point[] };
   configs: BFSet<ChartSpec>;
   last_message: string;

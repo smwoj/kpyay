@@ -6,21 +6,21 @@ import { Chart } from "./charts/Chart";
 import { AppState, ChartSpec } from "../store/models";
 import { calculate } from "./charts/calculate";
 import "./../styles.css";
-import { HashRouter, Route, Switch } from "react-router-dom";
-import { RouteConfig } from "react-router-config";
+import { HashRouter, Redirect, Route, Switch } from "react-router-dom";
 import MetricIdInput, { getMetricData } from "./MetricIdInput";
 import * as _ from "lodash";
 import { Point } from "../models/Point";
 import stringify from "json-stable-stringify";
 import { SaveViewButton } from "./viewPersistance/PersistViewButton";
 import { loadView } from "./viewPersistance/api";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
-  failedToFetchPointsAction,
-  fetchedConfigAction,
+  setConfigAction,
   fetchedPointsAction,
   showMessageAction,
 } from "../store/actions";
+import { Action } from "redux";
+import { BFSet } from "../lib/collections/BFSet";
 
 const configsToCharts = (
   cache: { [metricId: string]: Point[] },
@@ -37,7 +37,15 @@ const configsToCharts = (
       });
     };
     const points = cache[metricId].filter(isOk);
+    if (points.length === 0) {
+      throw new Error(
+        `No points for rendering for specs ${stringify(
+          specs
+        )}. Available data keys: ${Object.keys(cache)}`
+      );
+    }
     const data = calculate(points, xAccessor);
+    console.log(`${stringify(specs)} -> ${data.data.length}`);
     return (
       <Chart
         key={stringify(spec)}
@@ -50,46 +58,36 @@ const configsToCharts = (
   });
 };
 
+const getAndDispatch = async (
+  metricId: string,
+  dispatch: (a: Action) => void
+) => {
+  const points = await getMetricData(metricId);
+  dispatch(fetchedPointsAction(metricId, points));
+};
+
+const executeView = async (viewName: string, dispatch: (a: Action) => void) => {
+  const cfg = await loadView(viewName);
+  const uniqueIds = _.uniq(_.map([...cfg], (c) => c.metricId));
+  await Promise.all(
+    uniqueIds.map((metricId) => getAndDispatch(metricId, dispatch))
+  );
+  dispatch(setConfigAction(viewName, cfg));
+};
+
 const Spa = (
   props: AppState & {
     dispatch: any;
     match: any;
   }
 ) => {
-  // const viewName = props.match.url.slice(1);
-  // const dispatch = props.dispatch;
-  // useEffect(() => {
-  //   console.log(`Fetching data for view: ${viewName}`);
-  //   loadView(viewName).then(
-  //     (cfg) => {
-  //       Object.keys(cfg.data).forEach((metricId) => {
-  //         // todo: wywal duplikację
-  //         getMetricData(metricId).then(
-  //           (points) => {
-  //             console.log(`Got ${points.length} points for ${metricId}`);
-  //             props.dispatch(fetchedPointsAction(metricId, points));
-  //           },
-  //           (err) => {
-  //             console.log("NO BUENO:", err);
-  //             props.dispatch(
-  //               failedToFetchPointsAction(metricId, err.toString())
-  //             );
-  //           }
-  //         );
-  //       });
-  //       dispatch(fetchedConfigAction(viewName, cfg));
-  //     },
-  //     (err) => {
-  //       const msg = `Couldn't fetch view: ${viewName}, error: ${err.toString()}`;
-  //       console.log(msg);
-  //       dispatch(showMessageAction(msg));
-  //     }
-  //   );
-  // }, [viewName]);
+  const { viewName } = props;
 
   const [width, height] = useWindowSize();
   const chartWidth = width >= 600 ? 600 : width;
   const chartHeight = height >= 300 ? 300 : height;
+
+  console.log(`configs: ${stringify([...props.configs])}`);
 
   const specsByMetric = _.groupBy([...props.configs], (cfg) => cfg.metricId);
   const charts = _.flatMap(
@@ -105,11 +103,11 @@ const Spa = (
     }
   );
 
+  const viewHeader = viewName ? <h1>{viewName}</h1> : null;
   return (
     <div className="app-div">
       <header className="App-header">
-        {/*<h1>{viewName ? "View: " + viewName : "(unnamed view)"}</h1>*/}
-        {/*wrzuć to w reduxa i ustawiaj jeśli ściąganie pykło*/}
+        {viewHeader}
         <p>{props.last_message}</p>
         <div className="example-input">
           <MetricIdInput />
@@ -123,6 +121,7 @@ const Spa = (
 
 function mapStateToProps(state: AppState): AppState {
   return {
+    viewName: state.viewName,
     cache: state.cache,
     configs: state.configs,
     last_message: state.last_message,
@@ -130,16 +129,47 @@ function mapStateToProps(state: AppState): AppState {
 }
 const App = connect(mapStateToProps)(Spa);
 
-export const routes: RouteConfig[] = [
-  {
-    path: "/:slug",
-    component: () => <App />,
-  },
-];
+const _PredefinedView = (props: {
+  dispatch: (a: Action) => void;
+  match: any;
+}) => {
+  const viewName = props.match.url.slice(1);
+  const dispatch = props.dispatch;
+
+  const [view, setView] = useState(<h1>{`Please wait...`}</h1>);
+
+  useEffect(() => {
+    console.log("executing effect");
+    if (!viewName) {
+      return;
+    } else {
+      dispatch(setConfigAction(viewName, new BFSet<ChartSpec>()));
+    }
+    executeView(viewName, dispatch).then(
+      () => {
+        dispatch(showMessageAction(`Loaded view ${viewName}`));
+        console.log("Loading view OK, rendering...");
+        setView(<App />);
+      },
+      (err) => {
+        dispatch(
+          showMessageAction(
+            `View loading error: ${err.toString()}. Redirected to new view.`
+          )
+        );
+        console.log("Loading view FAILED, redirecting to new view...");
+        setView(<Redirect to="/" />);
+      }
+    );
+  }, [props.match.url]);
+
+  return view;
+};
+const PredefinedView = connect()(_PredefinedView);
 
 const route = (
   <Switch>
-    <Route path="/:view" component={App} />
+    <Route path="/:view" component={PredefinedView} />
     <Route path="/" component={App} />
   </Switch>
 );
