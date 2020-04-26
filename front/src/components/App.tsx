@@ -1,7 +1,6 @@
 import * as React from "react";
 import { connect, Provider } from "react-redux";
 import { configureStore, initStore } from "../store/init";
-import { useWindowSize } from "./hooks";
 import { Chart } from "./charts/Chart";
 import { AppState, ChartSpec } from "../store/models";
 import { calculate } from "./charts/calculate";
@@ -29,7 +28,8 @@ const configsToCharts = (
   chartWidth: number,
   chartHeight: number
 ): JSX.Element[] => {
-  return specs.map((spec) => {
+  const specsInStableOrder = _.sortBy(specs, (s) => stringify(s.restrictions));
+  return specsInStableOrder.map((spec) => {
     const { restrictions, xAccessor } = spec;
     const isOk = (p: Point): boolean => {
       return _.entries(restrictions).every(([param, value]) => {
@@ -93,28 +93,29 @@ const Spa = (
   console.log(`configs: ${stringify([...props.configs])}`);
 
   const specsByMetric = _.groupBy([...props.configs], (cfg) => cfg.metricId);
-  const charts = _.flatMap(
+  const specsInStableOrder = _.sortBy(
     Object.entries(specsByMetric),
-    ([metricId, chartSpecs]) => {
-      return configsToCharts(
-        props.cache,
-        [...chartSpecs],
-        metricId,
-        chartWidth,
-        chartHeight
-      );
-    }
+    ([metricId, _specs]) => metricId
   );
+  const charts = _.flatMap(specsInStableOrder, ([metricId, chartSpecs]) => {
+    return configsToCharts(
+      props.cache,
+      [...chartSpecs],
+      metricId,
+      chartWidth,
+      chartHeight
+    );
+  });
 
   const viewHeader = viewName ? <h1>{viewName}</h1> : null;
   return (
     <div id="app-div">
       {viewHeader}
       {/*TODO: zrób expiring message box*/}
-      {/*<p>{props.last_message}</p>*/}
       {/*<div className="ui-buttons">*/}
       {/*<MetricIdInput />*/}
       {/*<SaveViewButton />*/}
+      {/*<p>{props.last_message}</p>*/}
       {/*</div>*/}
       <section className="charts-grid">{charts}</section>
     </div>
@@ -122,12 +123,7 @@ const Spa = (
 };
 
 function mapStateToProps(state: AppState): AppState {
-  return {
-    viewName: state.viewName,
-    cache: state.cache,
-    configs: state.configs,
-    last_message: state.last_message,
-  };
+  return { ...state };
 }
 const App = connect(mapStateToProps)(Spa);
 
