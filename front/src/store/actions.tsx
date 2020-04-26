@@ -180,7 +180,7 @@ export const setConfigAction = (
 };
 export type IToggleCfgButtons = Action;
 
-export const toggleConfigButtonsVisibility = (): IToggleCfgButtons => {
+export const toggleCfgBtnVisibility = (): IToggleCfgButtons => {
   return {
     type: ActionTypes.TOGGLE_CFG_BT_VISIBILITY,
   };

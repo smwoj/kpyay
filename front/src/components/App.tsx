@@ -20,6 +20,7 @@ import {
 } from "../store/actions";
 import { Action } from "redux";
 import { BFSet } from "../lib/collections/BFSet";
+import ToggleCfgVisibilityButton from "./ToggleCfgVisibility";
 
 const configsToCharts = (
   cache: { [metricId: string]: Point[] },
@@ -111,12 +112,13 @@ const Spa = (
   return (
     <div id="app-div">
       {viewHeader}
-      {/*TODO: zrób expiring message box*/}
-      {/*<div className="ui-buttons">*/}
-      {/*<MetricIdInput />*/}
-      {/*<SaveViewButton />*/}
-      {/*<p>{props.last_message}</p>*/}
-      {/*</div>*/}
+      <div className="ui-buttons">
+        <ToggleCfgVisibilityButton />
+        <MetricIdInput />
+        <SaveViewButton />
+        {/*TODO: zrób expiring message box*/}
+        <p>{props.last_message}</p>
+      </div>
       <section className="charts-grid">{charts}</section>
     </div>
   );
