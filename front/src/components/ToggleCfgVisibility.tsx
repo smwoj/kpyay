@@ -13,6 +13,7 @@ const ToggleCfgVisibilityButton = (props: {
   return (
     <Button
       size="default"
+      className="cfg-"
       onClick={() => {
         dispatch(toggleCfgBtnVisibility());
       }}

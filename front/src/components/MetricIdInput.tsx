@@ -22,7 +22,7 @@ export async function getMetricData(metricId: string): Promise<Point[]> {
   if (points === undefined) {
     console.log("bad stuff happened, can't fetch data for " + metricId);
     return Promise.reject(
-      new Error(`Data for metric ${metricId} couldn't be fetched.`)
+      new Error(`Data for metric '${metricId}' couldn't be fetched.`)
     );
   } else {
     return Promise.resolve(points);
@@ -54,17 +54,17 @@ export async function getMetricData(metricId: string): Promise<Point[]> {
 //     }
 //   );
 // };
+const { Search } = Input;
 
 const MetricIdInput = (props: {
   dispatch: (action: Action) => void;
 }): JSX.Element => {
   return (
-    <Input
-      size="default"
+    <Search
       placeholder="metricId"
-      onPressEnter={(e) => {
-        const metricId = e.currentTarget.value;
-
+      enterButton="Load"
+      size="large"
+      onSearch={(metricId) => {
         getMetricData(metricId).then(
           (points) => {
             console.log(`Got ${points.length} points for ${metricId}`);

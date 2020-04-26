@@ -84,10 +84,6 @@ const Spa = (
 ) => {
   const { viewName } = props;
 
-  // const [width, height] = useWindowSize();
-  // const chartWidth = width >= 600 ? 600 : width;
-  // const chartHeight = height >= 300 ? 300 : height;
-
   const chartWidth = 500;
   const chartHeight = 300;
 
@@ -124,10 +120,7 @@ const Spa = (
   );
 };
 
-function mapStateToProps(state: AppState): AppState {
-  return { ...state };
-}
-const App = connect(mapStateToProps)(Spa);
+const App = connect((s) => ({ ...s }))(Spa);
 
 const _PredefinedView = (props: {
   dispatch: (a: Action) => void;
