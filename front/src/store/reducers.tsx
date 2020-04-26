@@ -12,6 +12,7 @@ import {
   IShowMessage,
   IFailedToSaveView,
   ISetConfig,
+  IToggleCfgButtons,
 } from "./actions";
 import { BFSet } from "../lib/collections/BFSet";
 import * as _ from "lodash";
@@ -19,6 +20,7 @@ import stringify from "json-stable-stringify";
 
 const INIT_STATE: AppState = {
   viewName: null,
+  showConfigButtons: true,
   cache: {},
   configs: new BFSet([]),
   last_message: "", // todo: make it expire
@@ -152,6 +154,16 @@ const reduceFetchedConfig = (state: AppState, action: ISetConfig): AppState => {
     last_message: viewName ? `Loaded config '${viewName}'.` : "",
   };
 };
+const reduceToggleCfgBtnVisibility = (
+  state: AppState,
+  action: IToggleCfgButtons
+): AppState => {
+  console.log(`Switching visibility of config buttons.`);
+  return {
+    ...state,
+    showConfigButtons: !state.showConfigButtons,
+  };
+};
 
 const reducersByActionType = (() => {
   const reducers: { [actionType: string]: Reducer } = {};
@@ -166,6 +178,7 @@ const reducersByActionType = (() => {
   reducers[ActionTypes.FAILED_TO_SAVE_VIEW] = reduceFailedToSaveView;
   reducers[ActionTypes.SHOW_MESSAGE] = reduceShowMessage;
   reducers[ActionTypes.FETCHED_CONFIG] = reduceFetchedConfig;
+  reducers[ActionTypes.TOGGLE_CFG_BT_VISIBILITY] = reduceToggleCfgBtnVisibility;
   return reducers;
 })();
 

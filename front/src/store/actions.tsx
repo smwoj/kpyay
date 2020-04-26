@@ -15,6 +15,7 @@ export const ActionTypes = {
   SAVED_VIEW: "SAVED_VIEW",
   FAILED_TO_SAVE_VIEW: "FAILED_TO_SAVE_VIEW",
   FETCHED_CONFIG: "FETCHED_CONFIG",
+  TOGGLE_CFG_BT_VISIBILITY: "TOGGLE_CFG_BT_VISIBILITY",
 };
 
 export interface IDeleteChart extends Action {
@@ -175,5 +176,12 @@ export const setConfigAction = (
       config,
       viewName,
     },
+  };
+};
+export type IToggleCfgButtons = Action;
+
+export const toggleConfigButtonsVisibility = (): IToggleCfgButtons => {
+  return {
+    type: ActionTypes.TOGGLE_CFG_BT_VISIBILITY,
   };
 };

@@ -16,6 +16,7 @@ export type ChartSpec = {
 };
 
 export interface AppState {
+  showConfigButtons: boolean;
   viewName: string | null;
   cache: { [metricId: string]: Point[] };
   configs: BFSet<ChartSpec>;

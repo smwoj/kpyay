@@ -4,7 +4,6 @@ import {
   Legend,
   Line,
   LineChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -21,7 +20,7 @@ import {
 import { ChartData } from "./calculate";
 import { connect } from "react-redux";
 import { Action } from "redux";
-import { ChartSpec } from "../../store/models";
+import { AppState, ChartSpec } from "../../store/models";
 
 const Title = (props: {
   metricId: string;
@@ -62,18 +61,10 @@ const calcXTicksInterval = (maxTicks: number): number => {
   return Math.floor(maxTicks / 12);
 };
 
-const _Chart = (
-  props: {
-    width: number;
-    height: number;
-    data: ChartData;
-    spec: ChartSpec;
-  } & { dispatch: (a: Action) => void }
-) => {
-  const { spec } = props;
-
+function ConfigButtons(props: { data: ChartData; spec: ChartSpec }) {
+  const { spec, data } = props;
   const selectDropdowns = Object.entries(
-    props.data.paramsToVariants
+    data.paramsToVariants
   ).map(([param, variants]) => (
     <SelectDropdown
       key={param}
@@ -84,7 +75,7 @@ const _Chart = (
   ));
 
   const splitByButtons = Object.entries(
-    props.data.paramsToVariants
+    data.paramsToVariants
   ).map(([param, variants]) => (
     <SplitByButton
       key={param}
@@ -94,42 +85,54 @@ const _Chart = (
     />
   ));
 
-  const lines = _.map(props.data.hashes, (hash, index) => {
+  return (
+    <div className="config-buttons-div">
+      <DeleteButton spec={spec} />
+      <SwitchXAxisButton spec={spec} />
+      {selectDropdowns}
+      {splitByButtons}
+    </div>
+  );
+}
+
+const _Chart = (
+  props: {
+    width: number;
+    height: number;
+    showConfigButtons: boolean;
+    data: ChartData;
+    spec: ChartSpec;
+  } & { dispatch: (a: Action) => void }
+) => {
+  const { spec, data, width, height, showConfigButtons } = props;
+
+  const lines = _.map(data.hashes, (hash, index) => {
     const colour = pickColour(index);
     return <Line key={hash} type="monotone" dataKey={hash} stroke={colour} />;
   });
   const legend = lines.length > 1 ? <Legend /> : null;
+  const configButtons = showConfigButtons ? (
+    <ConfigButtons spec={spec} data={data} />
+  ) : null;
+  const xAxis = (
+    <XAxis
+      dataKey={spec.xAccessor}
+      height={50}
+      tick={CustomizedAxisTick}
+      tickSize={3}
+      interval={calcXTicksInterval(data.data.length)}
+    />
+  );
   return (
     <div className="chart-canvas">
-      <Title
-        metricId={spec.metricId}
-        noChoiceParams={props.data.noChoiceParams}
-      />
-      <div className="config-buttons-div">
-        <DeleteButton spec={spec} />
-        <SwitchXAxisButton spec={spec} />
-        {selectDropdowns}
-        {splitByButtons}
-      </div>
-      <LineChart
-        width={props.width}
-        height={props.height}
-        data={props.data.data}
-      >
+      <Title metricId={spec.metricId} noChoiceParams={data.noChoiceParams} />
+      {configButtons}
+      <LineChart width={width} height={height} data={data.data}>
         <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-        <XAxis
-          dataKey={spec.xAccessor}
-          height={50}
-          tick={CustomizedAxisTick}
-          tickSize={3}
-          interval={calcXTicksInterval(props.data.data.length)}
-        />
-        <YAxis
-          type="number"
-          // domain={[0.5, 1.1]}
-          // not really happy with the default domain calculation,
-          // but taking the 0% effort for 50% satisfaction trade-off
-        />
+        {xAxis}
+        <YAxis type="number" />
+        {/* not really happy with the default domain calculation,
+        but taking the 0% effort for 50% satisfaction trade-off*/}
         <CartesianGrid stroke="#eeeeee" strokeDasharray="5 5" />
         {lines}
         {legend}
@@ -139,4 +142,6 @@ const _Chart = (
   );
 };
 
-export const Chart = connect()(_Chart);
+export const Chart = connect((state: AppState) => {
+  return { showConfigButtons: state.showConfigButtons };
+})(_Chart);
