@@ -46,13 +46,14 @@ const configsToCharts = (
     }
     const data = calculate(points, xAccessor);
     return (
-      <Chart
-        key={stringify(spec)}
-        width={chartWidth}
-        height={chartHeight}
-        data={data}
-        spec={spec}
-      />
+      <div className="chart-div" key={stringify(spec)}>
+        <Chart
+          width={chartWidth}
+          height={chartHeight}
+          data={data}
+          spec={spec}
+        />
+      </div>
     );
   });
 };
@@ -82,9 +83,12 @@ const Spa = (
 ) => {
   const { viewName } = props;
 
-  const [width, height] = useWindowSize();
-  const chartWidth = width >= 600 ? 600 : width;
-  const chartHeight = height >= 300 ? 300 : height;
+  // const [width, height] = useWindowSize();
+  // const chartWidth = width >= 600 ? 600 : width;
+  // const chartHeight = height >= 300 ? 300 : height;
+
+  const chartWidth = 500;
+  const chartHeight = 300;
 
   console.log(`configs: ${stringify([...props.configs])}`);
 
@@ -104,17 +108,15 @@ const Spa = (
 
   const viewHeader = viewName ? <h1>{viewName}</h1> : null;
   return (
-    <div className="app-div">
-      <header className="App-header">
-        {viewHeader}
-        {/*TODO: zrób expiring message box*/}
-        <p>{props.last_message}</p>
-        <div className="example-input">
-          <MetricIdInput />
-          <SaveViewButton />
-        </div>
-        <div>{charts}</div>
-      </header>
+    <div id="app-div">
+      {viewHeader}
+      {/*TODO: zrób expiring message box*/}
+      {/*<p>{props.last_message}</p>*/}
+      {/*<div className="ui-buttons">*/}
+      {/*<MetricIdInput />*/}
+      {/*<SaveViewButton />*/}
+      {/*</div>*/}
+      <section className="charts-grid">{charts}</section>
     </div>
   );
 };

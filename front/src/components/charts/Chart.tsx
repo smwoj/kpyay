@@ -4,6 +4,7 @@ import {
   Legend,
   Line,
   LineChart,
+  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -37,7 +38,13 @@ const Title = (props: {
   } else {
     title = "";
   }
-  return <h1>{props.metricId + title}</h1>;
+  return (
+    <div className="chart-title">
+      <span className="chart-metric">{props.metricId}</span>
+      <br />
+      <span className="chart-params">{title}</span>
+    </div>
+  );
 };
 
 const smartFormatter = (fullValue: number, name: string) => {
@@ -93,46 +100,41 @@ const _Chart = (
   });
   const legend = lines.length > 1 ? <Legend /> : null;
   return (
-    <div className="chartBox">
-      <div className="chart-title-div">
-        <Title
-          metricId={spec.metricId}
-          noChoiceParams={props.data.noChoiceParams}
-        />
-      </div>
-      <div id="config-buttons-div">
-        {/*todo: wywal do hoverowalnego komponentu */}
+    <div className="chart-canvas">
+      <Title
+        metricId={spec.metricId}
+        noChoiceParams={props.data.noChoiceParams}
+      />
+      <div className="config-buttons-div">
         <DeleteButton spec={spec} />
         <SwitchXAxisButton spec={spec} />
         {selectDropdowns}
         {splitByButtons}
       </div>
-      <div>
-        <LineChart
-          width={props.width}
-          height={props.height}
-          data={props.data.data}
-        >
-          <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-          <XAxis
-            dataKey={spec.xAccessor}
-            height={50}
-            tick={CustomizedAxisTick}
-            tickSize={3}
-            interval={calcXTicksInterval(props.data.data.length)}
-          />
-          <YAxis
-            type="number"
-            // domain={[0.5, 1.1]}
-            // not really happy with the default domain calculation,
-            // but taking the 0% effort for 50% satisfaction trade-off
-          />
-          <CartesianGrid stroke="#eeeeee" strokeDasharray="5 5" />
-          {lines}
-          {legend}
-          <Tooltip formatter={smartFormatter} />
-        </LineChart>
-      </div>
+      <LineChart
+        width={props.width}
+        height={props.height}
+        data={props.data.data}
+      >
+        <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+        <XAxis
+          dataKey={spec.xAccessor}
+          height={50}
+          tick={CustomizedAxisTick}
+          tickSize={3}
+          interval={calcXTicksInterval(props.data.data.length)}
+        />
+        <YAxis
+          type="number"
+          // domain={[0.5, 1.1]}
+          // not really happy with the default domain calculation,
+          // but taking the 0% effort for 50% satisfaction trade-off
+        />
+        <CartesianGrid stroke="#eeeeee" strokeDasharray="5 5" />
+        {lines}
+        {legend}
+        <Tooltip formatter={smartFormatter} />
+      </LineChart>
     </div>
   );
 };

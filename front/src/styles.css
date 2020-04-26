@@ -1,9 +1,45 @@
-body{
-    background-color: #efeee0;
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
+
+
+body {
+    background: #efeee0;
+    font-family: 'Noto Sans', sans-serif;
+}
+.app-div{
+    padding: 20px;
+    margin: 10px 10px;
+}
+.charts-grid{
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+}
+.chart-div {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.chart-canvas{
+}
+.chart-title {
+    text-align: center;
+}
+.recharts-wrapper {
+    margin: 0 auto;
+}
+.chart-metric {
+    font-size: medium;
+}
+.chart-params {
+    font-size: small;
 }
 
-#app-div {
-    width: 50%;
-    margin: 0 auto;
-    background-color: #ee00ef
+.config-buttons-div {
+    display: compact;
+    text-align: center;
 }
+
+/*.chart-title:hover + .config-buttons-div {*/
+/*    display: block;*/
+/*    margin: auto;*/
+/*}*/
