@@ -1,18 +1,29 @@
-@import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
-
-
 body {
-    background: #ddf;
-    font-family: 'Noto Sans', sans-serif;
+    background: whitesmoke;
+    /*font-family: 'Noto Sans', sans-serif;*/
 }
 .app-div{
     padding: 20px;
     margin: 10px 10px;
 }
+.ui-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+.ui-bar-elem {
+}
+.disappearing-msg {
+    text-align: center;
+}
+.message-box{
+    text-align: center;
+}
 .charts-grid{
     display: grid;
     gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
 }
 .chart-div {
     flex-direction: column;

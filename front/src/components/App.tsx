@@ -76,6 +76,26 @@ const executeView = async (viewName: string, dispatch: (a: Action) => void) => {
   dispatch(setConfigAction(viewName, cfg));
 };
 
+const TransientMessage = (props: { message: string }) => {
+  const [leftSeconds, setLeftSeconds] = useState(5);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLeftSeconds(leftSeconds ? leftSeconds - 1 : 0);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [leftSeconds]);
+
+  const dots = ".".repeat(leftSeconds);
+  const empty = " ";
+
+  return (
+    <span className="disappearing-msg">
+      <p>{leftSeconds > 0 ? dots + props.message + dots : empty}</p>
+    </span>
+  );
+};
+
 const Spa = (
   props: AppState & {
     dispatch: any;
@@ -84,8 +104,8 @@ const Spa = (
 ) => {
   const { viewName } = props;
 
-  const chartWidth = 500;
-  const chartHeight = 300;
+  const chartWidth = 600;
+  const chartHeight = 350;
 
   console.log(`configs: ${stringify([...props.configs])}`);
 
@@ -108,13 +128,18 @@ const Spa = (
   return (
     <div id="app-div">
       {viewHeader}
-      <div className="ui-buttons">
-        <ToggleCfgVisibilityButton />
-        <MetricIdInput />
-        <SaveViewButton />
-        {/*TODO: zrób expiring message box*/}
-        <p>{props.last_message}</p>
+      <div className="ui-bar">
+        <div className="ui-bar-elem cfg-vis-btn">
+          <ToggleCfgVisibilityButton />
+        </div>
+        <div className="ui-bar-elem metric-id-inp">
+          <MetricIdInput />
+        </div>
+        <div className="ui-bar-elem save-view-btn">
+          <SaveViewButton />
+        </div>
       </div>
+      <TransientMessage message={props.last_message} key={props.last_message} />
       <section className="charts-grid">{charts}</section>
     </div>
   );

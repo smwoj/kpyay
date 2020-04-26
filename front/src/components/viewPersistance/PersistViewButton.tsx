@@ -1,9 +1,7 @@
 import { Action } from "redux";
 import { Input } from "antd";
 import {
-  failedToFetchPointsAction,
   failedToSaveViewAction,
-  fetchedPointsAction,
   savedViewAction,
   showMessageAction,
 } from "../../store/actions";
@@ -32,6 +30,7 @@ const SaveView = (
   }
 ): JSX.Element => {
   const { configs, currentViewName, dispatch } = props;
+  // TODO: fix - (new view name) - with predefined views it doesn't correctly show view name
   return (
     <Search
       placeholder={currentViewName || "(new view name)"}
