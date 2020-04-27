@@ -10,6 +10,53 @@ const viewsRepo: { [viewName: string]: BFSet<ChartSpec> } = {
       restrictions: {},
     },
   ] as ChartSpec[]),
+  lotsa: new BFSet<ChartSpec>([
+    {
+      metricId: "gamma",
+      restrictions: { classifier: "random-forest", team: "echo" },
+      xAccessor: "timestamp",
+    },
+    {
+      metricId: "gamma",
+      restrictions: { classifier: "random-forest", team: "foxtrot" },
+      xAccessor: "timestamp",
+    },
+    {
+      metricId: "gamma",
+      restrictions: { classifier: "random-forest", team: "lima" },
+      xAccessor: "timestamp",
+    },
+    {
+      metricId: "gamma",
+      restrictions: { classifier: "cnn-gamma", team: "echo" },
+      xAccessor: "timestamp",
+    },
+    {
+      metricId: "gamma",
+      restrictions: { classifier: "cnn-gamma", team: "foxtrot" },
+      xAccessor: "timestamp",
+    },
+    {
+      metricId: "gamma",
+      restrictions: { classifier: "cnn-gamma", team: "lima" },
+      xAccessor: "timestamp",
+    },
+    {
+      metricId: "gamma",
+      restrictions: { classifier: "cnn-eta", team: "echo" },
+      xAccessor: "timestamp",
+    },
+    {
+      metricId: "gamma",
+      restrictions: { classifier: "cnn-eta", team: "foxtrot" },
+      xAccessor: "timestamp",
+    },
+    {
+      metricId: "gamma",
+      restrictions: { classifier: "cnn-eta", team: "lima" },
+      xAccessor: "timestamp",
+    },
+  ]),
 };
 
 export async function saveView(

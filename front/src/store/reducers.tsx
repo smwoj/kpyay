@@ -1,5 +1,5 @@
 import { Action, Reducer } from "redux";
-import { AppState, ChartSpec } from "./models";
+import { AppState } from "./models";
 import {
   ActionTypes,
   IDeleteChart,
@@ -12,26 +12,17 @@ import {
   IShowMessage,
   IFailedToSaveView,
   ISetConfig,
+  IToggleCfgButtons,
 } from "./actions";
-import * as mock_data from "../mock_data/data";
 import { BFSet } from "../lib/collections/BFSet";
 import * as _ from "lodash";
 import stringify from "json-stable-stringify";
 
 const INIT_STATE: AppState = {
   viewName: null,
-  cache: {
-    // "dogs-muffins f-score": mock_data.DOGS_VS_MUFFINS_FSCORES,
-    // alfa: mock_data.DOGS_VS_MUFFINS_FSCORES,
-    // beta: mock_data.SLOTHS_VS_PASTRY_FSCORES,
-  },
-  configs: new BFSet([
-    //   {
-    //     xAccessor: "timestamp",
-    //     metricId: "beta",
-    //     restrictions: { team: "foxtrot" },
-    //   },
-  ] as ChartSpec[]),
+  showConfigButtons: true,
+  cache: {},
+  configs: new BFSet([]),
   last_message: "", // todo: make it expire
 };
 
@@ -163,6 +154,16 @@ const reduceFetchedConfig = (state: AppState, action: ISetConfig): AppState => {
     last_message: viewName ? `Loaded config '${viewName}'.` : "",
   };
 };
+const reduceToggleCfgBtnVisibility = (
+  state: AppState,
+  action: IToggleCfgButtons
+): AppState => {
+  console.log(`Switching visibility of config buttons.`);
+  return {
+    ...state,
+    showConfigButtons: !state.showConfigButtons,
+  };
+};
 
 const reducersByActionType = (() => {
   const reducers: { [actionType: string]: Reducer } = {};
@@ -177,6 +178,7 @@ const reducersByActionType = (() => {
   reducers[ActionTypes.FAILED_TO_SAVE_VIEW] = reduceFailedToSaveView;
   reducers[ActionTypes.SHOW_MESSAGE] = reduceShowMessage;
   reducers[ActionTypes.FETCHED_CONFIG] = reduceFetchedConfig;
+  reducers[ActionTypes.TOGGLE_CFG_BT_VISIBILITY] = reduceToggleCfgBtnVisibility;
   return reducers;
 })();
 

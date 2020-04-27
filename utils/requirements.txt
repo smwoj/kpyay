@@ -1,2 +1,4 @@
 ipykernel
 more-itertools
+requests
+pytest

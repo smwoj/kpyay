@@ -1,7 +1,6 @@
 import * as React from "react";
 import { connect, Provider } from "react-redux";
 import { configureStore, initStore } from "../store/init";
-import { useWindowSize } from "./hooks";
 import { Chart } from "./charts/Chart";
 import { AppState, ChartSpec } from "../store/models";
 import { calculate } from "./charts/calculate";
@@ -21,6 +20,7 @@ import {
 } from "../store/actions";
 import { Action } from "redux";
 import { BFSet } from "../lib/collections/BFSet";
+import ToggleCfgVisibilityButton from "./ToggleCfgVisibility";
 
 const configsToCharts = (
   cache: { [metricId: string]: Point[] },
@@ -29,7 +29,8 @@ const configsToCharts = (
   chartWidth: number,
   chartHeight: number
 ): JSX.Element[] => {
-  return specs.map((spec) => {
+  const specsInStableOrder = _.sortBy(specs, (s) => stringify(s.restrictions));
+  return specsInStableOrder.map((spec) => {
     const { restrictions, xAccessor } = spec;
     const isOk = (p: Point): boolean => {
       return _.entries(restrictions).every(([param, value]) => {
@@ -45,15 +46,15 @@ const configsToCharts = (
       );
     }
     const data = calculate(points, xAccessor);
-    console.log(`${stringify(specs)} -> ${data.data.length}`);
     return (
-      <Chart
-        key={stringify(spec)}
-        width={chartWidth}
-        height={chartHeight}
-        data={data}
-        spec={spec}
-      />
+      <div className="chart-div" key={stringify(spec)}>
+        <Chart
+          width={chartWidth}
+          height={chartHeight}
+          data={data}
+          spec={spec}
+        />
+      </div>
     );
   });
 };
@@ -75,6 +76,26 @@ const executeView = async (viewName: string, dispatch: (a: Action) => void) => {
   dispatch(setConfigAction(viewName, cfg));
 };
 
+const TransientMessage = (props: { message: string }) => {
+  const [leftSeconds, setLeftSeconds] = useState(5);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLeftSeconds(leftSeconds ? leftSeconds - 1 : 0);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [leftSeconds]);
+
+  const dots = ".".repeat(leftSeconds);
+  const empty = " ";
+
+  return (
+    <span className="disappearing-msg">
+      <p>{leftSeconds > 0 ? dots + props.message + dots : empty}</p>
+    </span>
+  );
+};
+
 const Spa = (
   props: AppState & {
     dispatch: any;
@@ -83,51 +104,48 @@ const Spa = (
 ) => {
   const { viewName } = props;
 
-  const [width, height] = useWindowSize();
-  const chartWidth = width >= 600 ? 600 : width;
-  const chartHeight = height >= 300 ? 300 : height;
+  const chartWidth = 600;
+  const chartHeight = 350;
 
   console.log(`configs: ${stringify([...props.configs])}`);
 
   const specsByMetric = _.groupBy([...props.configs], (cfg) => cfg.metricId);
-  const charts = _.flatMap(
+  const specsInStableOrder = _.sortBy(
     Object.entries(specsByMetric),
-    ([metricId, chartSpecs]) => {
-      return configsToCharts(
-        props.cache,
-        [...chartSpecs],
-        metricId,
-        chartWidth,
-        chartHeight
-      );
-    }
+    ([metricId, _specs]) => metricId
   );
+  const charts = _.flatMap(specsInStableOrder, ([metricId, chartSpecs]) => {
+    return configsToCharts(
+      props.cache,
+      [...chartSpecs],
+      metricId,
+      chartWidth,
+      chartHeight
+    );
+  });
 
   const viewHeader = viewName ? <h1>{viewName}</h1> : null;
   return (
-    <div className="app-div">
-      <header className="App-header">
-        {viewHeader}
-        <p>{props.last_message}</p>
-        <div className="example-input">
+    <div id="app-div">
+      {viewHeader}
+      <div className="ui-bar">
+        <div className="ui-bar-elem cfg-vis-btn">
+          <ToggleCfgVisibilityButton />
+        </div>
+        <div className="ui-bar-elem metric-id-inp">
           <MetricIdInput />
+        </div>
+        <div className="ui-bar-elem save-view-btn">
           <SaveViewButton />
         </div>
-        <div>{charts}</div>
-      </header>
+      </div>
+      <TransientMessage message={props.last_message} key={props.last_message} />
+      <section className="charts-grid">{charts}</section>
     </div>
   );
 };
 
-function mapStateToProps(state: AppState): AppState {
-  return {
-    viewName: state.viewName,
-    cache: state.cache,
-    configs: state.configs,
-    last_message: state.last_message,
-  };
-}
-const App = connect(mapStateToProps)(Spa);
+const App = connect((s) => ({ ...s }))(Spa);
 
 const _PredefinedView = (props: {
   dispatch: (a: Action) => void;

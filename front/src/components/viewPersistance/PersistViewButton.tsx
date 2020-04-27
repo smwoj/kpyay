@@ -13,14 +13,16 @@ import { saveView } from "./api";
 
 interface SaveViewButtonProps {
   configs: BFSet<ChartSpec>;
-  currentViewName?: string;
+  currentViewName: string | null;
 }
 
 function mapStateToProps(state: AppState): SaveViewButtonProps {
   return {
     configs: state.configs,
+    currentViewName: state.viewName,
   };
 }
+const { Search } = Input;
 
 const SaveView = (
   props: SaveViewButtonProps & {
@@ -28,12 +30,13 @@ const SaveView = (
   }
 ): JSX.Element => {
   const { configs, currentViewName, dispatch } = props;
+  // TODO: fix - (new view name) - with predefined views it doesn't correctly show view name
   return (
-    <Input
-      size="default"
-      placeholder={currentViewName || "(name of your view)"}
-      onPressEnter={(e) => {
-        const viewName = (e.currentTarget.value || currentViewName) as string;
+    <Search
+      placeholder={currentViewName || "(new view name)"}
+      enterButton="Save"
+      size="large"
+      onSearch={(viewName) => {
         if (viewName === "") {
           dispatch(showMessageAction("Can't save a view with no name!"));
         } else {
