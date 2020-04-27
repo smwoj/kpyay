@@ -8,7 +8,7 @@ pub struct Version(u16, u16, u16);
 pub struct Point {
     value: f64,
     version: Option<Version>,
-    timestamp: DateTime<Utc>,
+    timestamp: Option<DateTime<Utc>>,
     params: std::collections::BTreeMap<String, String>,
 }
 
@@ -53,4 +53,25 @@ mod tests {
             DateTime::parse_from_rfc3339("1996-12-19T16:39:57-08:00").unwrap()
         );
     }
+
+    #[test]
+    fn rejects_malformed_timestamps() {
+        let parsed: Result<Point, _> = serde_json::from_str(
+            r#"{"value": 3.45, "timestamp": "shakira shakira", "params": {"team": "wege"}}"#,
+        );
+        if !&parsed.is_ok() {
+            println!("{}", parsed.as_ref().err().unwrap())
+        };
+        let p = parsed.unwrap();
+        assert_eq!(
+            p.params,
+            btreemap! {"team".to_string() => "wege".to_string()}
+        );
+        assert_eq!(p.version, None);
+        assert_eq!(
+            p.timestamp,
+            DateTime::parse_from_rfc3339("1996-12-19T16:39:57-08:00").unwrap()
+        );
+    }
+
 }

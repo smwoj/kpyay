@@ -1,7 +1,7 @@
 mod client;
 
-struct Point {}
-// TODO: rename
+pub use client::CLIENT;
+
 // let client: &Client = &*CLIENT;
 // client
 //     .get_connection()?

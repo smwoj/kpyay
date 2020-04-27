@@ -9,5 +9,5 @@ fn init_client() -> Client {
 }
 
 lazy_static::lazy_static! {
-    static ref CLIENT: Client =  init_client() ;
+    pub static ref CLIENT: Client =  init_client() ;
 }

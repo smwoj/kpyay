@@ -59,10 +59,24 @@ def test_post(expected_status, payload):
 
 @pytest.mark.parametrize(
     "expected_status, slug",
-    [(200, "/points/mock-metric"), (404, "/svfvsfv"), (404, "/shrek")],
+    [(404, "/svfvsfv"), (404, "/shrek"), (404, "/shrek/donkey")],
 )
-def test_get(expected_status, slug):
+def test_get_various(expected_status, slug):
     response = requests.get(f"{ORIGIN}{slug}")
     assert (
         response.status_code == expected_status
     ), f"This is supposed to return {expected_status}; response text:\n '''{response.text}'''"
+
+
+@pytest.mark.parametrize(
+    "expected_status, slug",
+    [(200, "/points/mock-metric"), (200, "/points/ANOTHER-mock-metric"),],
+)
+def test_get_points(expected_status, slug):
+    response = requests.get(f"{ORIGIN}{slug}")
+    assert (
+        response.status_code == expected_status
+    ), f"This is supposed to return {expected_status}; response text:\n '''{response.text}'''"
+
+
+# TODO: set config test
