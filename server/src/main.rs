@@ -1,18 +1,29 @@
+#[macro_use]
+extern crate log;
+#[macro_use]
+extern crate maplit;
 use actix_cors::Cors;
-use actix_web::{get, web, App, HttpServer, Responder};
+use actix_web::{middleware::Logger, web, App, HttpServer};
 
-#[get("/{slug}")]
-async fn index(info: web::Path<String>) -> impl Responder {
-    serde_json::json!({ "echoed": info.into_inner() }).to_string()
-}
+mod db;
+mod handlers;
+mod primitives;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
+    env_logger::init();
+
     HttpServer::new(|| {
         App::new()
-            .service(index)
+            .route("/points/{metricId}", web::get().to(handlers::get_points))
+            .route("/points/{metricId}", web::post().to(handlers::add_point))
+            // .route("/configs/{viewId}", web::get().to(handlers::get_config))
+            // .route("/configs/{viewId}", web::post().to(handlers::set_config))
+            // TODO: /rename metric
+            // .route("/", web::get().to(handlers::fallback))
             // https://docs.rs/actix-cors/0.2.0/actix_cors/index.html
-            .wrap(Cors::new().allowed_methods(vec!["GET"]).finish())
+            .wrap(Cors::new().allowed_methods(vec!["GET", "POST"]).finish())
+            .wrap(Logger::default())
     })
     .bind("127.0.0.1:8088")?
     .run()
