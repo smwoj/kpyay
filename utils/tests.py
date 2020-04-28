@@ -2,6 +2,8 @@ import os, subprocess, pytest, requests
 from subprocess import PIPE, Popen
 from testing.redis import RedisServer
 
+from api import is_api_str
+
 """
 This is an integration test suite. 
 Fixtures provide:
@@ -10,7 +12,7 @@ Fixtures provide:
 
 USAGE: 
   
-    pytest server_tests.py 
+    pytest tests.py 
     
 """
 SERVER_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../server"))
@@ -51,7 +53,7 @@ def running_server(compiled_server, redis):
 
 @pytest.fixture
 def server_with_existing_content(running_server):
-
+    pass
 
 
 @pytest.mark.parametrize(
