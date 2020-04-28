@@ -73,5 +73,4 @@ mod tests {
             DateTime::parse_from_rfc3339("1996-12-19T16:39:57-08:00").unwrap()
         );
     }
-
 }

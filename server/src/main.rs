@@ -9,9 +9,11 @@ mod db;
 mod handlers;
 mod primitives;
 
+
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     env_logger::init();
+    db::assert_client_works();
 
     HttpServer::new(|| {
         App::new()
