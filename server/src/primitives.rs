@@ -12,6 +12,14 @@ pub struct Point {
     params: std::collections::BTreeMap<String, String>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Config {
+    metric_id: String,
+    x_accessor: String,
+    restrictions: std::collections::BTreeMap<String, String>,
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;

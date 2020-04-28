@@ -1,7 +1,3 @@
-// #[macro_use]
-// extern crate log;
-// #[macro_use]
-// extern crate maplit;
 use actix_cors::Cors;
 use actix_web::{middleware::Logger, web, App, HttpServer};
 
@@ -19,8 +15,8 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .route("/points/{metricId}", web::get().to(handlers::get_points))
             .route("/points/{metricId}", web::post().to(handlers::add_point))
-            .route("/configs/{viewId}", web::get().to(handlers::get_config))
-            .route("/configs/{viewId}", web::post().to(handlers::set_config))
+            .route("/configs/{configName}", web::get().to(handlers::get_config))
+            .route("/configs/{configName}", web::post().to(handlers::set_config))
             // TODO: /rename metric
             // https://docs.rs/actix-cors/0.2.0/actix_cors/index.html
             .wrap(Cors::new().allowed_methods(vec!["GET", "POST"]).finish())
