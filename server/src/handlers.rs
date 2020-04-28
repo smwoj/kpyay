@@ -10,14 +10,14 @@ use redis::AsyncCommands;
 pub async fn get_points(metric: web::Path<String>) -> HttpResponse {
     // TODO: assert metric matches correct regex
     let mut conn: redis::aio::Connection = CLIENT.get_async_connection().await.unwrap();
-    let key = format!("metrics/{}", metric);
-    // conn.con(&key).await.unwrap()
+    let key = format!("points/{}", metric);
     let metric_exists: bool = conn.exists(&key).await.unwrap();
+    let existing_metrics: Result<Vec<String>, _>= conn.keys("*").await;
     if !metric_exists {
-        return HttpResponse::NotFound().body(format!("points for metric '{}' not found", metric));
+        return HttpResponse::NotFound().body(format!("Points for metric '{}' not found. Existing metrics: {:?}", metric, existing_metrics));
     }
     let points = conn
-        .get::<&str, Vec<String>>(&key)
+        .lrange::<&str, Vec<String>>(&key, 0, -1)
         .await
         .unwrap()
         .into_iter()

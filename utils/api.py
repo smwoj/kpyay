@@ -1,6 +1,6 @@
 import requests, json, re
 from datetime import datetime
-from typing import Optional, Dict, Set, Union, Tuple
+from typing import Optional, Dict, Set, Union, Tuple, NamedTuple, List
 
 _REGEX = rf"([a-zA-Z0-9]+-)*([a-zA-Z0-9]+)"
 _PARAM_RE = re.compile(_REGEX)
@@ -56,13 +56,13 @@ Version = Tuple[int, int, int]
 class Point:
     def __init__(
         self,
-        value: float,
-        params: Optional[Dict[str, str]],
-        timestamp: Optional[Union[str, datetime]],
-        version=Optional[Union[str, Tuple[int, int, int]]],
+        value: Union[float, int],
+        params: Optional[Dict[str, str]] = None,
+        timestamp: Optional[Union[str, datetime]] = None,
+        version: Optional[Union[str, Tuple[int, int, int]]] = None,
     ):
-        self.value: float = value
-        self.params: Dict[str, str] = params
+        self.value: float = float(value)
+        self.params: Dict[str, str] = params or {}
         self.timestamp: Optional[datetime] = datetime.fromisoformat(
             timestamp
         ) if isinstance(timestamp, str) else timestamp
@@ -82,15 +82,14 @@ class Point:
             }
         )
 
-
-class ViewConfig:
-    def __init__(self, metric: str, x_accessor: str, restrictions: Dict[str, str]):
-        self.metric: str = metric
-        self.x_accessor: str = x_accessor
-        self.restrictions: Dict[str, str] = restrictions
-
-    def to_json(self) -> str:
+    def __repr__(self):
         return json.dumps(vars(self))
+
+
+class _ChartConfig(NamedTuple):
+    metric: str
+    x_accessor: str
+    restrictions: Dict[str, str]
 
 
 class KPYayError(Exception):
@@ -111,7 +110,7 @@ class ServerClient:
         self._server_url = server_url
 
     def post_point(self, metric: str, p: Point) -> None:
-        resp = requests.post(f"{self._server_url}/points/{metric}", json=p.to_json())
+        resp = requests.post(f"{self._server_url}/points/{metric}", data=p.to_json())
         if resp.status_code != 200:
             raise KPYayError(f"Posting points failed - {_response_details(resp)}")
 
@@ -122,17 +121,18 @@ class ServerClient:
 
         return {Point(**d) for d in json.loads(resp.text)}
 
-    def post_config(self, config_name: str, config: ViewConfig) -> None:
+    def _post_view(self, config_name: str, configs: List[_ChartConfig]) -> None:
         resp = requests.post(
-            f"{self._server_url}/configs/{config_name}", json=config.to_json()
+            f"{self._server_url}/configs/{config_name}",
+            json=[c._asdict() for c in configs],
         )
         if resp.status_code != 200:
             raise KPYayError(f"Posting config failed - {_response_details(resp)}'")
 
-    def get_config(self, config_name: str) -> ViewConfig:
+    def _get_view(self, config_name: str) -> List[_ChartConfig]:
         resp = requests.get(f"{self._server_url}/configs/{config_name}")
         if resp.status_code != 200:
             raise KPYayError(
                 f"Couldn't get config '{config_name}'. {_response_details(resp)}"
             )
-        return ViewConfig(**json.loads(resp.text))
+        return [_ChartConfig(**cfg) for cfg in json.loads(resp.text)]
