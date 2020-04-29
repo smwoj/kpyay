@@ -1,4 +1,4 @@
-import os, subprocess, pytest, requests, json
+import os, subprocess, pytest, requests, json, contextlib
 from datetime import datetime, timezone, timedelta
 from subprocess import PIPE, Popen
 from testing.redis import RedisServer
@@ -17,17 +17,21 @@ USAGE:
 SERVER_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../server"))
 
 
-@pytest.fixture
-def redis():
-    """ Provides a new Redis instance. """
+@contextlib.contextmanager
+def running_redis():
+    """ Provides a test Redis instance. """
     with RedisServer() as redis:
         port = redis.dsn()["port"]
         yield f"redis://127.0.0.1:{port}"
 
 
-@pytest.fixture(scope="session")
-def compiled_server():
-    """ Asserts the server compiles. """
+@pytest.fixture
+def redis():
+    with running_redis() as redis:
+        yield redis
+
+
+def compile_server():
     finished_build = subprocess.run(
         f"cd {SERVER_ROOT} && cargo build", stdout=PIPE, stderr=PIPE, shell=True
     )
@@ -36,6 +40,12 @@ def compiled_server():
         msg = "\n".join([screamer, finished_build.stderr.decode(), screamer])
         # screamer used twice to have nice "short test summary info" in pytest report
         raise AssertionError(msg)
+
+
+@pytest.fixture(scope="session")
+def compiled_server():
+    """ Asserts the server compiles. """
+    compile_server()
 
 
 def _wait_until_responds(url: str, max_seconds: int = 10):
@@ -55,9 +65,8 @@ def _wait_until_responds(url: str, max_seconds: int = 10):
     )
 
 
-@pytest.fixture
-def running_server(compiled_server, redis):
-    """ Provides a fresh server + Redis pair. """
+@contextlib.contextmanager
+def running_server_cm(redis):
     with Popen(
         [f"{SERVER_ROOT}/target/debug/server", redis], stdout=PIPE, stderr=PIPE
     ) as server_process:
@@ -67,6 +76,13 @@ def running_server(compiled_server, redis):
         yield url
         server_process.terminate()
         print(server_process.stderr.read().decode())
+
+
+@pytest.fixture
+def running_server(compiled_server, redis):
+    """ Provides a test server + Redis pair. """
+    with running_server_cm(redis) as url:
+        yield url
 
 
 FIXED_TIMESTAMP_STR = "2020-04-29T12:06:23"
