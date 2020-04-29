@@ -1,4 +1,4 @@
-import requests, json, re
+import requests, json, re, warnings
 from datetime import datetime
 from typing import Optional, Dict, Set, Union, Tuple, NamedTuple, List
 
@@ -99,7 +99,7 @@ class Point(NamedTuple):
         )
 
 
-class _ChartConfig(NamedTuple):
+class ChartConfig(NamedTuple):
     metric: str
     x_accessor: str
     restrictions: Dict[str, str]
@@ -134,19 +134,22 @@ class ServerClient:
 
         return [Point.create(**d) for d in json.loads(resp.text)]
 
-    def get_view(self, config_name: str) -> List[_ChartConfig]:
+    def get_view(self, config_name: str) -> List[ChartConfig]:
         resp = requests.get(f"{self._server_url}/configs/{config_name}")
         if resp.status_code != 200:
             raise KPYayError(
                 f"Couldn't get config '{config_name}'. {_response_details(resp)}"
             )
-        return [_ChartConfig(**cfg) for cfg in json.loads(resp.text)]
+        return [ChartConfig(**cfg) for cfg in json.loads(resp.text)]
 
-    def _post_view(self, config_name: str, configs: List[_ChartConfig]) -> None:
-        """ This method is "private", since this API is supposed to be consumed by front end. """
+    def _post_view(self, config_name: str, configs: List[ChartConfig]) -> None:
+        """
+        WARNING: this API is supposed to be consumed by front end!
+        Front end is responsible for allowing serialization of only these views, which "render nicely".
+        """
         resp = requests.post(
             f"{self._server_url}/configs/{config_name}",
             json=[c._asdict() for c in configs],
         )
-        if resp.status_code != 200:
+        if resp.status_code != 201:
             raise KPYayError(f"Posting config failed - {_response_details(resp)}'")

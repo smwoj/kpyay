@@ -3,7 +3,7 @@ from datetime import datetime, timezone, timedelta
 from subprocess import PIPE, Popen
 from testing.redis import RedisServer
 
-from api import ServerClient, Point, _ChartConfig, KPYayError
+from api import ServerClient, Point, ChartConfig, KPYayError
 
 """
 This is an integration test suite. 
@@ -43,9 +43,13 @@ def _wait_until_responds(url: str, max_seconds: int = 10):
     one_sleep = 200  # ms
     n_sleeps = int(max_seconds * 1000 / one_sleep)
     for r in range(n_sleeps):
-        resp = requests.get(url)
-        if resp.status_code == 200:
-            return
+        try:
+            resp = requests.get(url)
+        except requests.exceptions.ConnectionError:
+            pass
+        else:
+            if resp.status_code == 200:
+                return
     raise RuntimeError(
         f"{max_seconds}s after spawning the server still doesn't respond."
     )
@@ -90,14 +94,22 @@ def client_to_existing_content(running_server):
         "cost", Point.create(20, params={"team": "vege"}),
     )
 
+    first_view = [
+        ChartConfig(
+            metric="cost", x_accessor="timestamp", restrictions={"team": "vege"}
+        ),
+        ChartConfig(
+            metric="cost", x_accessor="timestamp", restrictions={"team": "burgery"}
+        ),
+    ]
+
+    client._post_view("sample-view", first_view)
     client._post_view(
         "sample-view",
         [
-            _ChartConfig(
-                metric="cost", x_accessor="timestamp", restrictions={"team": "vege"}
-            ),
-            _ChartConfig(
-                metric="cost", x_accessor="timestamp", restrictions={"team": "burgery"}
+            *first_view,
+            ChartConfig(
+                metric="cost", x_accessor="timestamp", restrictions={"team": "olimp"}
             ),
         ],
     )
@@ -155,34 +167,50 @@ def test_datestamp_serialization(variant: datetime, formatted):
     assert Point._fmt_ts(variant) == formatted
 
 
-# TODO REVERT
-# @pytest.mark.parametrize("timestamp", ["NaN", "2020-04-29 12:06:23", "2020-04-29", ""])
-# def test_posting_with_invalid_timestamp_format_fails(running_server, timestamp):
-#     resp = requests.post(
-#         f"{running_server}/points/stuff",
-#         data=json.dumps({"value": 1.2, "timestamp": "NaN"}),
-#     )
-#     assert resp.status_code == 400
+@pytest.mark.parametrize("timestamp", ["NaN", "2020-04-29 12:06:23", "2020-04-29", ""])
+def test_posting_with_invalid_timestamp_format_fails(running_server, timestamp):
+    resp = requests.post(
+        f"{running_server}/points/stuff",
+        data=json.dumps({"value": 1.2, "timestamp": "NaN"}),
+    )
+    assert resp.status_code == 400
 
 
-# def test_expected_content(client_to_existing_content: ServerClient):
-#     client = client_to_existing_content
-#
-#     actual = client.get_points("f-score")
-#     assert actual == [
-#         Point(
-#             value=0.75,
-#             params={},
-#             timestamp=datetime.fromisoformat("2020-04-29T12:06:23"),
-#             version=None,
-#         ),
-#         Point(
-#             value=0.72,
-#             params={},
-#             timestamp=datetime.fromisoformat("2020-04-29T12:06:23"),
-#             version=None,
-#         ),
-#     ]
+def test_existing_points(client_to_existing_content: ServerClient):
+    client = client_to_existing_content
+
+    actual = client.get_points("f-score")
+    assert actual == [
+        Point(
+            value=0.75,
+            params={},
+            timestamp=datetime.fromisoformat("2020-04-29T12:06:23"),
+            version=None,
+        ),
+        Point(
+            value=0.72,
+            params={},
+            timestamp=datetime.fromisoformat("2020-04-29T12:06:23"),
+            version=None,
+        ),
+    ]
+
+
+def test_existing_view(client_to_existing_content: ServerClient):
+    client = client_to_existing_content
+
+    view = client.get_view("sample-view")
+    assert view == [
+        ChartConfig(
+            metric="cost", x_accessor="timestamp", restrictions={"team": "vege"}
+        ),
+        ChartConfig(
+            metric="cost", x_accessor="timestamp", restrictions={"team": "burgery"}
+        ),
+        ChartConfig(
+            metric="cost", x_accessor="timestamp", restrictions={"team": "olimp"}
+        ),
+    ]
 
 
 @pytest.mark.parametrize(
@@ -247,14 +275,3 @@ def test_posting_points(running_server, expected_status, payload):
 def test_404s(running_server, uri):
     response = requests.get(f"{running_server}{uri}")
     assert response.status_code == 404, f"Response text:\n '''{response.text}'''"
-
-
-# @pytest.mark.parametrize(
-#     "uri",
-#     ["/points/mock-metric", "/points/ANOTHER-mock-metric",],
-# )
-# def test_get_points(runexpected_status, uri):
-#     response = requests.get(f"{ORIGIN}{slug}")
-#     assert (
-#         response.status_code == expected_status
-#     ), f"This is supposed to return {expected_status}; response text:\n '''{response.text}'''"

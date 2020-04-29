@@ -3,9 +3,7 @@ use super::primitives::*;
 use actix_web::{web, HttpResponse};
 use redis::AsyncCommands;
 
-// enum UnhappyResponse{
-//    InvalidMetric
-// }
+// TODO: get rid of ALL THESE UNWRAPS
 
 pub async fn get_points(metric: web::Path<String>) -> HttpResponse {
     // TODO: assert metric matches correct regex
@@ -36,12 +34,14 @@ pub async fn add_point(metric: web::Path<String>, payload_bytes: web::Bytes) -> 
         Ok(p) => p,
         Err(e) => {
             let bytes = payload_bytes.as_ref();
-            let content_ref = std::str::from_utf8(bytes).map(|s| s.to_string())
+            let content_ref = std::str::from_utf8(bytes)
+                .map(|s| s.to_string())
                 .unwrap_or_else(|e| format!("not valid utf-8: '{:?}'", bytes));
-            return HttpResponse::BadRequest()
-                .body(format!(
-                    "Content in invalid format: {}. Posted content: '{:?}'",
-                    e.to_string(), content_ref));
+            return HttpResponse::BadRequest().body(format!(
+                "Content in invalid format: {}. Posted content: '{:?}'",
+                e.to_string(),
+                content_ref
+            ));
         }
     };
     point.fill_timestamp_if_missing();
@@ -70,16 +70,18 @@ pub async fn set_config(config_name: web::Path<String>, payload_bytes: web::Byte
     let mut conn: redis::aio::Connection = CLIENT.get_async_connection().await.unwrap();
     let key = format!("configs/{}", config_name);
     let json_value = serde_json::to_string(&value).unwrap();
-    let _: Result<(), _> = conn.lpush(&key, &json_value).await;
+    let _: () = conn.lpush(&key, &json_value).await.unwrap();
 
-    HttpResponse::Ok().body(format!("OK, set_config {:?}={}", config_name, json_value))
+    HttpResponse::Created().body("")
 }
 
 pub async fn get_config(config_name: web::Path<String>) -> HttpResponse {
     let mut conn: redis::aio::Connection = CLIENT.get_async_connection().await.unwrap();
     let key = format!("configs/{}", config_name);
-    let res: String = conn.lindex(&key, -1).await.unwrap();
-    dbg!(&res);
-    // 404 if not in redis
+    let res: String = conn.lindex(&key, 0).await.unwrap();
     HttpResponse::Ok().body(res)
+}
+
+pub async fn root() -> HttpResponse {
+    HttpResponse::Ok().body("Hello!")
 }
