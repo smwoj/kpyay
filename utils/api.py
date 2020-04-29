@@ -135,7 +135,7 @@ class ServerClient:
         return [Point.create(**d) for d in json.loads(resp.text)]
 
     def get_view(self, config_name: str) -> List[ChartConfig]:
-        resp = requests.get(f"{self._server_url}/configs/{config_name}")
+        resp = requests.get(f"{self._server_url}/views/{config_name}")
         if resp.status_code != 200:
             raise KPYayError(
                 f"Couldn't get config '{config_name}'. {_response_details(resp)}"
@@ -148,7 +148,7 @@ class ServerClient:
         Front end is responsible for allowing serialization of only these views, which "render nicely".
         """
         resp = requests.post(
-            f"{self._server_url}/configs/{config_name}",
+            f"{self._server_url}/views/{config_name}",
             json=[c._asdict() for c in configs],
         )
         if resp.status_code != 201:

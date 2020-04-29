@@ -14,11 +14,8 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .route("/points/{metricId}", web::get().to(handlers::get_points))
             .route("/points/{metricId}", web::post().to(handlers::add_point))
-            .route("/configs/{configName}", web::get().to(handlers::get_config))
-            .route(
-                "/configs/{configName}",
-                web::post().to(handlers::set_config),
-            )
+            .route("/views/{configName}", web::get().to(handlers::get_config))
+            .route("/views/{configName}", web::post().to(handlers::set_config))
             .route("/", web::get().to(handlers::root))
             // TODO: /rename metric
             // https://docs.rs/actix-cors/0.2.0/actix_cors/index.html

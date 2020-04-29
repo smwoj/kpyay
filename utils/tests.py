@@ -275,3 +275,13 @@ def test_posting_points(running_server, expected_status, payload):
 def test_404s(running_server, uri):
     response = requests.get(f"{running_server}{uri}")
     assert response.status_code == 404, f"Response text:\n '''{response.text}'''"
+
+
+def test_getting_not_existing_point(running_server):
+    response = requests.get(f"{running_server}/points/i-dont-exist")
+    assert response.status_code == 404, f"Response text:\n '''{response.text}'''"
+
+
+def test_getting_not_existing_config(running_server):
+    response = requests.get(f"{running_server}/views/i-dont-exist")
+    assert response.status_code == 404, f"Response text:\n '''{response.text}'''"

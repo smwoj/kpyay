@@ -10,9 +10,10 @@ pub async fn get_points(metric: web::Path<String>) -> HttpResponse {
     let mut conn: redis::aio::Connection = CLIENT.get_async_connection().await.unwrap();
     let key = format!("points/{}", metric);
     let metric_exists: bool = conn.exists(&key).await.unwrap();
-    let existing_metrics: Result<Vec<String>, _> = conn.keys("*").await;
     if !metric_exists {
-        // todo: plug in suggestions with levenshtein
+        let existing_metrics: Vec<String> = conn.keys("points/*").await.unwrap();
+
+        // todo: provide suggestions with levenshtein
         return HttpResponse::NotFound().body(format!(
             "Points for metric '{}' not found. Existing metrics: {:?}",
             metric, existing_metrics
@@ -68,7 +69,7 @@ pub async fn set_config(config_name: web::Path<String>, payload_bytes: web::Byte
         }
     };
     let mut conn: redis::aio::Connection = CLIENT.get_async_connection().await.unwrap();
-    let key = format!("configs/{}", config_name);
+    let key = format!("views/{}", config_name);
     let json_value = serde_json::to_string(&value).unwrap();
     let _: () = conn.lpush(&key, &json_value).await.unwrap();
 
@@ -77,8 +78,19 @@ pub async fn set_config(config_name: web::Path<String>, payload_bytes: web::Byte
 
 pub async fn get_config(config_name: web::Path<String>) -> HttpResponse {
     let mut conn: redis::aio::Connection = CLIENT.get_async_connection().await.unwrap();
-    let key = format!("configs/{}", config_name);
+    let key = format!("views/{}", config_name);
+    let config_exists: bool = conn.exists(&key).await.unwrap();
+    if !config_exists {
+        let existing_configs: Vec<String> = conn.keys("views/*").await.unwrap();
+        // todo: provide suggestions with levenshtein
+        return HttpResponse::NotFound().body(format!(
+            "Config '{}' not found. Existing configs: {:?}",
+            config_name, existing_configs
+        ));
+    }
     let res: String = conn.lindex(&key, 0).await.unwrap();
+    dbg!(&key, &res);
+
     HttpResponse::Ok().body(res)
 }
 
