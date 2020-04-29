@@ -27,6 +27,8 @@ pub struct Config {
     restrictions: std::collections::BTreeMap<String, String>,
 }
 
+pub type View = Vec<Config>;
+
 #[cfg(test)]
 mod tests {
     use super::*;

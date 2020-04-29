@@ -39,7 +39,7 @@ pub async fn add_point(metric: web::Path<String>, payload_bytes: web::Bytes) -> 
                 .map(|s| s.to_string())
                 .unwrap_or_else(|e| format!("not valid utf-8: '{:?}'", bytes));
             return HttpResponse::BadRequest().body(format!(
-                "Content in invalid format: {}. Posted content: '{:?}'",
+                "Payload is not a valid point: {}. Posted payload: '{:?}'",
                 e.to_string(),
                 content_ref
             ));
@@ -55,41 +55,49 @@ pub async fn add_point(metric: web::Path<String>, payload_bytes: web::Bytes) -> 
     // validate with schema
     // check if redis/schemas match
 
-    HttpResponse::Ok().body(format!("OK, added {:?}", point))
+    HttpResponse::Created().body("")
 }
 
-pub async fn set_config(config_name: web::Path<String>, payload_bytes: web::Bytes) -> HttpResponse {
-    let value: serde_json::Value = match serde_json::from_slice(payload_bytes.as_ref()) {
+pub async fn set_view(view_name: web::Path<String>, payload_bytes: web::Bytes) -> HttpResponse {
+    let view: View = match serde_json::from_slice(payload_bytes.as_ref()) {
         Ok(v) => v,
         Err(e) => {
+            // return HttpResponse::BadRequest().body(format!(
+            //     "Content is not valid utf-8 json, detail: {}",
+            //     e.to_string()
+            // ));
+            let bytes = payload_bytes.as_ref();
+            let content_ref = std::str::from_utf8(bytes)
+                .map(|s| s.to_string())
+                .unwrap_or_else(|e| format!("not valid utf-8: '{:?}'", bytes));
             return HttpResponse::BadRequest().body(format!(
-                "Content is not valid utf-8 json, detail: {}",
-                e.to_string()
+                "Payload is not a valid view: {}. Posted payload: '{:?}'",
+                e.to_string(),
+                content_ref
             ));
         }
     };
     let mut conn: redis::aio::Connection = CLIENT.get_async_connection().await.unwrap();
-    let key = format!("views/{}", config_name);
-    let json_value = serde_json::to_string(&value).unwrap();
+    let key = format!("views/{}", view_name);
+    let json_value = serde_json::to_string(&view).unwrap();
     let _: () = conn.lpush(&key, &json_value).await.unwrap();
 
     HttpResponse::Created().body("")
 }
 
-pub async fn get_config(config_name: web::Path<String>) -> HttpResponse {
+pub async fn get_view(view_name: web::Path<String>) -> HttpResponse {
     let mut conn: redis::aio::Connection = CLIENT.get_async_connection().await.unwrap();
-    let key = format!("views/{}", config_name);
-    let config_exists: bool = conn.exists(&key).await.unwrap();
-    if !config_exists {
-        let existing_configs: Vec<String> = conn.keys("views/*").await.unwrap();
+    let key = format!("views/{}", view_name);
+    let view_exists: bool = conn.exists(&key).await.unwrap();
+    if !view_exists {
+        let existing_views: Vec<String> = conn.keys("views/*").await.unwrap();
         // todo: provide suggestions with levenshtein
         return HttpResponse::NotFound().body(format!(
-            "Config '{}' not found. Existing configs: {:?}",
-            config_name, existing_configs
+            "Config '{}' not found. Existing views: {:?}",
+            view_name, existing_views
         ));
     }
     let res: String = conn.lindex(&key, 0).await.unwrap();
-    dbg!(&key, &res);
 
     HttpResponse::Ok().body(res)
 }

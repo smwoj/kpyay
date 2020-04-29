@@ -1,9 +1,9 @@
-import os, subprocess, pytest, time, requests, json
+import os, subprocess, pytest, requests, json
 from datetime import datetime, timezone, timedelta
 from subprocess import PIPE, Popen
 from testing.redis import RedisServer
 
-from api import ServerClient, Point, ChartConfig, KPYayError
+from api import ServerClient, Point, ChartConfig
 
 """
 This is an integration test suite. 
@@ -96,10 +96,10 @@ def client_to_existing_content(running_server):
 
     first_view = [
         ChartConfig(
-            metric="cost", x_accessor="timestamp", restrictions={"team": "vege"}
+            metric_id="cost", x_accessor="timestamp", restrictions={"team": "vege"}
         ),
         ChartConfig(
-            metric="cost", x_accessor="timestamp", restrictions={"team": "burgery"}
+            metric_id="cost", x_accessor="timestamp", restrictions={"team": "burgery"}
         ),
     ]
 
@@ -109,7 +109,7 @@ def client_to_existing_content(running_server):
         [
             *first_view,
             ChartConfig(
-                metric="cost", x_accessor="timestamp", restrictions={"team": "olimp"}
+                metric_id="cost", x_accessor="timestamp", restrictions={"team": "olimp"}
             ),
         ],
     )
@@ -202,13 +202,13 @@ def test_existing_view(client_to_existing_content: ServerClient):
     view = client.get_view("sample-view")
     assert view == [
         ChartConfig(
-            metric="cost", x_accessor="timestamp", restrictions={"team": "vege"}
+            metric_id="cost", x_accessor="timestamp", restrictions={"team": "vege"}
         ),
         ChartConfig(
-            metric="cost", x_accessor="timestamp", restrictions={"team": "burgery"}
+            metric_id="cost", x_accessor="timestamp", restrictions={"team": "burgery"}
         ),
         ChartConfig(
-            metric="cost", x_accessor="timestamp", restrictions={"team": "olimp"}
+            metric_id="cost", x_accessor="timestamp", restrictions={"team": "olimp"}
         ),
     ]
 
@@ -217,7 +217,7 @@ def test_existing_view(client_to_existing_content: ServerClient):
     "expected_status, payload",
     [
         (
-            200,
+            201,
             {
                 "value": 3.1415,
                 "version": [1, 2, 3],
@@ -226,7 +226,7 @@ def test_existing_view(client_to_existing_content: ServerClient):
             },
         ),
         (
-            200,
+            201,
             {
                 # it's OK to skip version
                 "value": 3.1415,
@@ -285,3 +285,14 @@ def test_getting_not_existing_point(running_server):
 def test_getting_not_existing_config(running_server):
     response = requests.get(f"{running_server}/views/i-dont-exist")
     assert response.status_code == 404, f"Response text:\n '''{response.text}'''"
+
+
+def test_posting_corruputed_view(running_server):
+    """ View should be a list of configs, not a single config. """
+    response = requests.post(
+        f"{running_server}/views/a-corrupted-view",
+        json=ChartConfig(
+            metric_id="cost", x_accessor="timestamp", restrictions={"team": "vege"}
+        )._asdict(),
+    )
+    assert response.status_code == 400, f"Response text:\n '''{response.text}'''"

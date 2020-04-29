@@ -100,7 +100,7 @@ class Point(NamedTuple):
 
 
 class ChartConfig(NamedTuple):
-    metric: str
+    metric_id: str
     x_accessor: str
     restrictions: Dict[str, str]
 
@@ -124,13 +124,17 @@ class ServerClient:
 
     def post_point(self, metric: str, p: Point) -> None:
         resp = requests.post(f"{self._server_url}/points/{metric}", data=p.to_json())
-        if resp.status_code != 200:
-            raise KPYayError(f"Posting points failed - {_response_details(resp)}")
+        if resp.status_code != 201:
+            raise KPYayError(
+                f"Posting points for '{metric}' failed - {_response_details(resp)}"
+            )
 
     def get_points(self, metric: str) -> List[Point]:
         resp = requests.get(f"{self._server_url}/points/{metric}")
         if resp.status_code != 200:
-            raise KPYayError(f"Fetching points failed - {_response_details(resp)}'")
+            raise KPYayError(
+                f"Fetching points for '{metric}' failed - {_response_details(resp)}'"
+            )
 
         return [Point.create(**d) for d in json.loads(resp.text)]
 
