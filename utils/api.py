@@ -64,7 +64,7 @@ class Point(NamedTuple):
         cls,
         value: Union[float, int],
         params: Optional[Dict[str, str]] = None,
-        timestamp: Optional[datetime] = None,
+        timestamp: Optional[Union[str, datetime]] = None,
         version: Optional[Union[str, Tuple[int, int, int]]] = None,
     ):
         """
@@ -72,6 +72,11 @@ class Point(NamedTuple):
         """
         version = (
             tuple(map(int, version.split("."))) if isinstance(version, str) else version
+        )
+        timestamp = (
+            datetime.fromisoformat(timestamp)
+            if isinstance(timestamp, str)
+            else timestamp
         )
         return cls(
             value=float(value),
@@ -127,7 +132,7 @@ class ServerClient:
         if resp.status_code != 200:
             raise KPYayError(f"Fetching points failed - {_response_details(resp)}'")
 
-        return [Point(**d) for d in json.loads(resp.text)]
+        return [Point.create(**d) for d in json.loads(resp.text)]
 
     def get_view(self, config_name: str) -> List[_ChartConfig]:
         resp = requests.get(f"{self._server_url}/configs/{config_name}")
