@@ -12,9 +12,13 @@ pub async fn get_points(metric: web::Path<String>) -> HttpResponse {
     let mut conn: redis::aio::Connection = CLIENT.get_async_connection().await.unwrap();
     let key = format!("points/{}", metric);
     let metric_exists: bool = conn.exists(&key).await.unwrap();
-    let existing_metrics: Result<Vec<String>, _>= conn.keys("*").await;
+    let existing_metrics: Result<Vec<String>, _> = conn.keys("*").await;
     if !metric_exists {
-        return HttpResponse::NotFound().body(format!("Points for metric '{}' not found. Existing metrics: {:?}", metric, existing_metrics));
+        // todo: plug in suggestions with levenshtein
+        return HttpResponse::NotFound().body(format!(
+            "Points for metric '{}' not found. Existing metrics: {:?}",
+            metric, existing_metrics
+        ));
     }
     let points = conn
         .lrange::<&str, Vec<String>>(&key, 0, -1)
@@ -28,14 +32,19 @@ pub async fn get_points(metric: web::Path<String>) -> HttpResponse {
 }
 
 pub async fn add_point(metric: web::Path<String>, payload_bytes: web::Bytes) -> HttpResponse {
-    let point: Point = match serde_json::from_slice(payload_bytes.as_ref()) {
+    let mut point: Point = match serde_json::from_slice(payload_bytes.as_ref()) {
         Ok(p) => p,
         Err(e) => {
+            let bytes = payload_bytes.as_ref();
+            let content_ref = std::str::from_utf8(bytes).map(|s| s.to_string())
+                .unwrap_or_else(|e| format!("not valid utf-8: '{:?}'", bytes));
             return HttpResponse::BadRequest()
-                .body(format!("Content in invalid format: {}", e.to_string()));
-            // todo improve err messages
+                .body(format!(
+                    "Content in invalid format: {}. Posted content: '{:?}'",
+                    e.to_string(), content_ref));
         }
     };
+    point.fill_timestamp_if_missing();
     let mut conn: redis::aio::Connection = CLIENT.get_async_connection().await.unwrap();
     let key = format!("points/{}", metric);
     let value = serde_json::to_string(&point).unwrap();

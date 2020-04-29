@@ -1,14 +1,13 @@
-import os, subprocess, pytest, time
+import os, subprocess, pytest, time, requests, json
+from datetime import datetime, timezone, timedelta
 from subprocess import PIPE, Popen
 from testing.redis import RedisServer
 
-from api import ServerClient, Point, _ChartConfig
+from api import ServerClient, Point, _ChartConfig, KPYayError
 
 """
 This is an integration test suite. 
-Fixtures provide:
- - compiled server,
- - and run it with a fresh Redis instance for each test.
+Each test runs with a fresh pair, server + redis.
 
 USAGE: 
   
@@ -20,7 +19,7 @@ SERVER_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../server
 
 @pytest.fixture
 def redis():
-    """ Provides fresh, empty Redis instance. """
+    """ Provides a new Redis instance. """
     with RedisServer() as redis:
         port = redis.dsn()["port"]
         yield f"redis://127.0.0.1:{port}"
@@ -53,16 +52,30 @@ def running_server(compiled_server, redis):
         print(server_process.stderr.read().decode())
 
 
+FIXED_TIMESTAMP_STR = "2020-04-29T12:06:23"
+FIXED_TIMESTAMP = datetime.fromisoformat(FIXED_TIMESTAMP_STR)
+
+
 @pytest.fixture
 def client_to_existing_content(running_server):
     client = ServerClient(running_server)
 
-    client.post_point("f-score", Point(0.72))
-    client.post_point("f-score", Point(0.75))
+    client.post_point(
+        "f-score", Point.create(0.72, timestamp=FIXED_TIMESTAMP),
+    )
+    client.post_point(
+        "f-score", Point.create(0.75, timestamp=FIXED_TIMESTAMP),
+    )
 
-    client.post_point("cost", Point(19.0, params={"team": "vege"}))
-    client.post_point("cost", Point(20.0, params={"team": "burgery"}))
-    client.post_point("cost", Point(20, params={"team": "vege"}))
+    client.post_point(
+        "cost", Point.create(19.0, params={"team": "vege"}),
+    )
+    client.post_point(
+        "cost", Point.create(20.0, params={"team": "burgery"}),
+    )
+    client.post_point(
+        "cost", Point.create(20, params={"team": "vege"}),
+    )
 
     client._post_view(
         "sample-view",
@@ -79,11 +92,70 @@ def client_to_existing_content(running_server):
     return client
 
 
-def test_expected_content(client_to_existing_content: ServerClient):
-    client = client_to_existing_content
+@pytest.mark.parametrize(
+    "p, json_str",
+    [
+        (Point.create(0.5), """{"value": 0.5, "params": {}}"""),
+        (
+            Point.create(1, params={"team": "vege"}),
+            """{"value": 1.0, "params": {"team": "vege"}}""",
+        ),
+        (
+            Point.create(1, version="1.2.0"),
+            """{"value": 1.0, "params": {}, "version": [1, 2, 0]}""",
+        ),
+        (
+            Point.create(1, version="2012.5.12"),
+            """{"value": 1.0, "params": {}, "version": [2012, 5, 12]}""",
+        ),
+        (
+            Point.create(1, timestamp=FIXED_TIMESTAMP),
+            """{"value": 1.0, "params": {}, "timestamp": "%s"}""" % FIXED_TIMESTAMP_STR,
+        ),
+    ],
+)
+def test_point_serialization(p: Point, json_str):
+    assert p.to_json() == json_str
 
-    actual = client.get_points("f-score")
-    assert actual == {}
+
+@pytest.mark.parametrize(
+    "variant, formatted",
+    [
+        (
+            datetime(2020, 12, 5, 20, 25, 45, tzinfo=timezone.utc),
+            "2020-12-05T20:25:45",
+        ),
+        (
+            datetime(
+                2020, 12, 5, 20, 25, 45, tzinfo=timezone(timedelta(seconds=14400))
+            ),
+            "2020-12-05T20:25:45",
+        ),
+        (datetime(2020, 12, 5, 20, 25, 45), "2020-12-05T20:25:45"),
+        (datetime(2020, 12, 5, 20, 25), "2020-12-05T20:25:00"),
+        (datetime(2020, 12, 5, 20), "2020-12-05T20:00:00"),
+        (datetime(2020, 12, 5), "2020-12-05T00:00:00"),
+        (datetime(2020, 12, 5), "2020-12-05T00:00:00"),
+    ],
+)
+def test_datestamp_serialization(variant: datetime, formatted):
+    assert Point._fmt_ts(variant) == formatted
+
+
+@pytest.mark.parametrize("timestamp", ["NaN", "2020-04-29 12:06:23", "2020-04-29", ""])
+def test_posting_with_invalid_timestamp_format_fails(running_server, timestamp):
+    resp = requests.post(
+        f"{running_server}/points/stuff",
+        data=json.dumps({"value": 1.2, "timestamp": "NaN"}),
+    )
+    assert resp.status_code == 400
+
+
+# def test_expected_content(client_to_existing_content: ServerClient):
+#     client = client_to_existing_content
+#
+#     actual = client.get_points("f-score")
+#     assert actual == {}
 
 
 # @pytest.mark.parametrize(

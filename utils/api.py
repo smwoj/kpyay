@@ -53,37 +53,45 @@ _PARAM_RE = re.compile(_REGEX)
 Version = Tuple[int, int, int]
 
 
-class Point:
-    def __init__(
-        self,
+class Point(NamedTuple):
+    value: float
+    params: Dict[str, str]
+    timestamp: Optional[datetime]  # any timezone info will be discarded
+    version: Optional[Tuple[int, int, int]]
+
+    @classmethod
+    def create(
+        cls,
         value: Union[float, int],
         params: Optional[Dict[str, str]] = None,
-        timestamp: Optional[Union[str, datetime]] = None,
+        timestamp: Optional[datetime] = None,
         version: Optional[Union[str, Tuple[int, int, int]]] = None,
     ):
-        self.value: float = float(value)
-        self.params: Dict[str, str] = params or {}
-        self.timestamp: Optional[datetime] = datetime.fromisoformat(
-            timestamp
-        ) if isinstance(timestamp, str) else timestamp
-        self.version: Optional[Version] = tuple(
-            map(int, version.split("."))
-        ) if isinstance(version, str) else version
+        """
+        More flexible "constructor" variant - performs conversions if necessary.
+        """
+        version = (
+            tuple(map(int, version.split("."))) if isinstance(version, str) else version
+        )
+        return cls(
+            value=float(value),
+            params=params or {},
+            timestamp=timestamp,
+            version=version,
+        )
+
+    @staticmethod
+    def _fmt_ts(ts: datetime):
+        return ts.replace(tzinfo=None).isoformat(sep="T", timespec="seconds")
 
     def to_json(self) -> str:
-        def fmt_if_datetime(value):
-            return value.isoformat() if isinstance(value, datetime) else value
-
         return json.dumps(
             {
-                field: fmt_if_datetime(value)
-                for field, value in vars(self).items()
+                field: self._fmt_ts(value) if isinstance(value, datetime) else value
+                for field, value in self._asdict().items()
                 if value is not None
             }
         )
-
-    def __repr__(self):
-        return json.dumps(vars(self))
 
 
 class _ChartConfig(NamedTuple):
@@ -114,25 +122,26 @@ class ServerClient:
         if resp.status_code != 200:
             raise KPYayError(f"Posting points failed - {_response_details(resp)}")
 
-    def get_points(self, metric: str) -> Set[Point]:
+    def get_points(self, metric: str) -> List[Point]:
         resp = requests.get(f"{self._server_url}/points/{metric}")
         if resp.status_code != 200:
             raise KPYayError(f"Fetching points failed - {_response_details(resp)}'")
 
-        return {Point(**d) for d in json.loads(resp.text)}
+        return [Point(**d) for d in json.loads(resp.text)]
 
-    def _post_view(self, config_name: str, configs: List[_ChartConfig]) -> None:
-        resp = requests.post(
-            f"{self._server_url}/configs/{config_name}",
-            json=[c._asdict() for c in configs],
-        )
-        if resp.status_code != 200:
-            raise KPYayError(f"Posting config failed - {_response_details(resp)}'")
-
-    def _get_view(self, config_name: str) -> List[_ChartConfig]:
+    def get_view(self, config_name: str) -> List[_ChartConfig]:
         resp = requests.get(f"{self._server_url}/configs/{config_name}")
         if resp.status_code != 200:
             raise KPYayError(
                 f"Couldn't get config '{config_name}'. {_response_details(resp)}"
             )
         return [_ChartConfig(**cfg) for cfg in json.loads(resp.text)]
+
+    def _post_view(self, config_name: str, configs: List[_ChartConfig]) -> None:
+        """ This method is "private", since this API is supposed to be consumed by front end. """
+        resp = requests.post(
+            f"{self._server_url}/configs/{config_name}",
+            json=[c._asdict() for c in configs],
+        )
+        if resp.status_code != 200:
+            raise KPYayError(f"Posting config failed - {_response_details(resp)}'")
