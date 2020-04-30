@@ -6,12 +6,11 @@ import { AppState, ChartSpec } from "../store/models";
 import { calculate } from "./charts/calculate";
 import "./../styles.css";
 import { HashRouter, Redirect, Route, Switch } from "react-router-dom";
-import MetricIdInput, { getMetricData } from "./MetricIdInput";
+import MetricIdInput from "./MetricIdInput";
 import * as _ from "lodash";
 import { Point } from "../models/Point";
 import stringify from "json-stable-stringify";
-import { SaveViewButton } from "./viewPersistance/PersistViewButton";
-import { loadView } from "./viewPersistance/api";
+import { SaveViewButton } from "./PersistViewButton";
 import { useEffect, useState } from "react";
 import {
   setConfigAction,
@@ -21,6 +20,7 @@ import {
 import { Action } from "redux";
 import { BFSet } from "../lib/collections/BFSet";
 import ToggleCfgVisibilityButton from "./ToggleCfgVisibility";
+import { getMetricData, loadView } from "../backendApi";
 
 const configsToCharts = (
   cache: { [metricId: string]: Point[] },
@@ -167,6 +167,7 @@ const _PredefinedView = (props: {
       () => {
         dispatch(showMessageAction(`Loaded view ${viewName}`));
         console.log("Loading view OK, rendering...");
+        // @ts-ignore
         setView(<App />);
       },
       (err) => {

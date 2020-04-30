@@ -4,12 +4,12 @@ import {
   failedToSaveViewAction,
   savedViewAction,
   showMessageAction,
-} from "../../store/actions";
+} from "../store/actions";
 import { connect } from "react-redux";
 import * as React from "react";
-import { AppState, ChartSpec } from "../../store/models";
-import { BFSet } from "../../lib/collections/BFSet";
-import { saveView } from "./api";
+import { AppState, ChartSpec } from "../store/models";
+import { BFSet } from "../lib/collections/BFSet";
+import { saveView } from "../backendApi";
 
 interface SaveViewButtonProps {
   configs: BFSet<ChartSpec>;

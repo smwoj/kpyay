@@ -6,33 +6,24 @@ export class Point {
   readonly _version: Version | null;
   readonly _params: { [param: string]: string };
   readonly _timestamp: Date;
-  readonly _postedTimestamp: Date;
 
   static fromRaw(rp: RawPoint): Point {
-    const { value, version, params, timestamp, postedTimestamp } = rp;
+    const { value, version, params, timestamp } = rp;
     const parsedVersion = version ? Version.parse(version) : null;
 
-    return new this(
-      value,
-      parsedVersion,
-      params,
-      new Date(timestamp),
-      new Date(postedTimestamp)
-    );
+    return new this(value, parsedVersion, params, new Date(timestamp));
   }
 
   constructor(
     value: number,
     version: Version | null,
     params: { [param: string]: string },
-    timestamp: Date,
-    postedTimestamp: Date
+    timestamp: Date
   ) {
     this._value = value;
     this._version = version;
     this._params = params;
     this._timestamp = timestamp;
-    this._postedTimestamp = postedTimestamp;
   }
 
   static ascVersion(left: Point, right: Point): number {
