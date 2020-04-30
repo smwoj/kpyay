@@ -5,50 +5,6 @@ from typing import Optional, Dict, Set, Union, Tuple, NamedTuple, List
 _REGEX = rf"([a-zA-Z0-9]+-)*([a-zA-Z0-9]+)"
 _PARAM_RE = re.compile(_REGEX)
 
-# validators ##############
-# def _debug_repr(value) -> str:
-#     value_str = str(value)[:30]
-#     return f"'{value_str}' (type={type(value)})"
-#
-#
-# ApiStr = str
-#
-#
-# def _validate_api_str(s: str) -> str:
-#     if _PARAM_RE.fullmatch(s) is None:
-#         raise KPYayError(
-#             f"'{s}' is not a string supported by the API. It should be a string matching: {_REGEX}"
-#         )
-#     return s
-#
-#
-# XAccessor = str
-#
-#
-# def _validate_x_accessor(x_accessor: str) -> str:
-#     if not isinstance(x_accessor, str) or x_accessor not in ("timestamp", "version"):
-#         raise KPYayError(
-#             f"x_accessor must be either 'timestamp' or 'version', but it's {_debug_repr(x_accessor)}"
-#         )
-#     return x_accessor
-#
-#
-# Version = Tuple[int, int, int]
-#
-#
-# def _validate_version(
-#     version: Union[str, Tuple[int, int, int]]
-# ) -> Tuple[int, int, int]:
-#     if isinstance(version, str):
-#         version = tuple(int(seg) for seg in version.split("."))
-#     if len(version) != 3 or any(not isinstance(i, int) for i in version):
-#         raise KPYayError(
-#             f"version must be a tuple of 3 ints or a string like '1.2.3', but it's {_debug_repr(version)}"
-#         )
-#     return version
-
-
-# ########################
 
 Version = Tuple[int, int, int]
 

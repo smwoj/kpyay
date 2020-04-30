@@ -12,7 +12,7 @@ describe("Point", () => {
       new Date("2012-04-14T00:02:30")
     );
 
-    expect(paramsHash(point._params)).toEqual("team=burgery, wege=nie");
+    expect(paramsHash(point.params)).toEqual("team=burgery, wege=nie");
   });
 
   it("provides correct ordering", () => {
@@ -43,15 +43,15 @@ describe("Point", () => {
       .slice()
       .sort(Point.ascVersion)
       .map((p) => [
-        p._version?.toString(),
-        p._timestamp.toISOString().slice(0, 10),
+        p.version?.toString(),
+        p.timestamp.toISOString().slice(0, 10),
       ]);
     const sortedByTimestamp = points
       .slice()
       .sort(Point.ascTimestamp)
       .map((p) => [
-        p._version?.toString(),
-        p._timestamp.toISOString().slice(0, 10),
+        p.version?.toString(),
+        p.timestamp.toISOString().slice(0, 10),
       ]);
 
     expect(sortedByVersion).toEqual([

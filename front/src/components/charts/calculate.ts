@@ -1,5 +1,4 @@
-import * as __ from "lodash";
-import * as _ from "underscore";
+import * as _ from "lodash";
 import { DefaultDict } from "../../lib/collections/DefaultDict";
 import { Point } from "../../models/Point";
 
@@ -18,20 +17,20 @@ export const partitionByVariants = (paramsToVariants: {
   [keys: string]: Set<string>;
 }): [NoChoiceParams, ParamVariants] => {
   type Params = [string, Set<string>][];
-  const [withOne, withMore]: [Params, Params] = __.partition(
+  const [withOne, withMore]: [Params, Params] = _.partition(
     Object.entries(paramsToVariants),
     (keyVal) => {
       const [, values] = keyVal;
       return values.size === 1;
     }
   );
-  const noChoice = _.object(
+  const noChoice = _.fromPairs(
     _.map(withOne, (kvPair) => {
       const [param, variants] = kvPair;
       return [param, variants.values().next().value];
     })
   );
-  const withVariants = _.object(
+  const withVariants = _.fromPairs(
     _.map(withMore, (kvPair) => {
       const [param, variants] = kvPair;
       return [param, [...variants]];
@@ -53,25 +52,25 @@ export const calculate = (
   const groups = new DefaultDict<Point[]>(() => []);
   const group: (p: Point) => string | undefined =
     xAccessor === "version"
-      ? (p: Point) => p._version?.toString()
-      : (p: Point) => p._timestamp.toISOString().slice(0, 19).replace("T", " ");
+      ? (p: Point) => p.version?.toString()
+      : (p: Point) => p.timestamp.toISOString().slice(0, 19).replace("T", " ");
   const variants = new DefaultDict<Set<string>>(() => new Set<string>());
 
   points.forEach((p) => {
     if (group(p)) {
       groups.get(group(p) as string).push(p);
     }
-    _.forEach(p._params, (value, param) => {
+    _.forEach(p.params, (value, param) => {
       variants.get(param).add(value);
     });
   });
   const [noChoiceParams, paramsToVariants] = partitionByVariants(variants.data);
 
   const relevantParamsHash = (p: Point): string => {
-    const hashableParams = Object.entries(p._params).filter(([param, val]) =>
+    const hashableParams = Object.entries(p.params).filter(([param, val]) =>
       paramsToVariants.hasOwnProperty(param)
     );
-    return paramsHash(_.object(hashableParams));
+    return paramsHash(_.fromPairs(hashableParams));
   };
 
   const hashes: Set<string> = new Set();
@@ -80,9 +79,9 @@ export const calculate = (
   });
 
   return {
-    data: __.map(groups.data, (ps, xacc) => {
-      const data: any = _.object(
-        ps.map((p) => [relevantParamsHash(p), p._value])
+    data: _.map(groups.data, (ps, xacc) => {
+      const data: any = _.fromPairs(
+        ps.map((p) => [relevantParamsHash(p), p.value])
       );
       data[xAccessor] = xacc;
       return data;

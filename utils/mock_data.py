@@ -65,19 +65,12 @@ def sins(a: float = 1, b: float = 0.1) -> Iterable[float]:
         yield a * math.sin(x * b)
 
 
-def logs(a: float = 1.0, b: float = 10, c: float = 0.0) -> Iterable[float]:
-    for x in itertools.count():
-        arg = x * b - c
-        yield a * math.log(max(1 / 1000, arg))
-
-
 def squares(a: float = 1.0, b: float = 0.0, c: float = 0.0) -> Iterable[float]:
     for x in itertools.count():
         yield a * x ** 2 + b * x + c
 
 
 nones = lambda: repeat(None)
-# hatetris
 
 
 T = TypeVar("T")
@@ -95,20 +88,25 @@ def mk_points(
     n: int,
     values: Iterable[float],
     params: Iterable[Dict[str, str]],
-    timestamps: Optional[Iterable[datetime]] = None,
+    timestamps: Iterable[datetime],
     versions: Optional[Iterable[str]] = None,
 ) -> List[Point]:
+    """
+    `timestamps` are normally optional, but me here must provide them for mock data
+    or else server will assign all the points almost exactly the same timestamp.
+    """
+
     timestamps = timestamps or nones()
     versions = versions or nones()
     return take(n, starmap(Point.create, zip(values, params, timestamps, versions)))
 
 
 POINTS = {
-    "base": mk_points(20, logs(), repeat({})),
+    "f-score": mk_points(70, asympt_approaching_1(), repeat({}), timestamps=datetimes(datetime(2018, 12, 24), timedelta(7))),
     "sins-ts": flat_collect(
-        mk_points(10, sins(0.2), repeat({"flavour": "choco"})),
-        mk_points(10, sins(0.5), repeat({"flavour": "berry"})),
-        mk_points(10, sins(0.4), repeat({"flavour": "vanilla"})),
+        mk_points(10, sins(0.2), repeat({"flavour": "choco"}), timestamps=datetimes(datetime(2018, 12, 24), timedelta(7))),
+        mk_points(10, sins(0.5), repeat({"flavour": "berry"}),timestamps=datetimes(datetime(2019, 2, 10), timedelta(7))),
+        mk_points(10, sins(0.4), repeat({"flavour": "vanilla"}),timestamps=datetimes(datetime(2019, 4, 16), timedelta(7))),
     ),
     "sins-versioned": flat_collect(
         *(
@@ -116,7 +114,7 @@ POINTS = {
                 10,
                 sins(sa, sb),
                 repeat(params),
-                timestamps=nones(),
+                timestamps=datetimes(datetime(2019, 6, 1), timedelta(14)),
                 versions=versions(),
             )
             for sa, sb, params in [

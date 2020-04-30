@@ -1,6 +1,6 @@
 import { Button, Dropdown, Menu } from "antd";
 import * as React from "react";
-import * as _ from "underscore";
+import * as _ from "lodash";
 import { connect } from "react-redux";
 import { Action } from "redux";
 import {
@@ -88,7 +88,7 @@ const _SelectDropdown = (
 ): JSX.Element => {
   const { paramName, spec } = props;
   const text = `select ${props.paramName}`;
-  const variantsToExecutors = _.object(
+  const variantsToExecutors = _.fromPairs(
     props.variants.map((variant) => [
       variant,
       () => props.dispatch(restrictAction(spec, paramName, variant)),

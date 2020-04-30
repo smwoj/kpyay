@@ -1,43 +1,34 @@
 import { Version } from "./Version";
-import { RawPoint } from "../store/models";
+import { ResponsePoint } from "../backendApi";
 
 export class Point {
-  readonly _value: number;
-  readonly _version: Version | null;
-  readonly _params: { [param: string]: string };
-  readonly _timestamp: Date;
-  readonly _postedTimestamp: Date;
+  readonly value: number;
+  readonly version: Version | null;
+  readonly params: { [param: string]: string };
+  readonly timestamp: Date;
 
-  static fromRaw(rp: RawPoint): Point {
-    const { value, version, params, timestamp, postedTimestamp } = rp;
-    const parsedVersion = version ? Version.parse(version) : null;
+  static fromResponse(rp: ResponsePoint): Point {
+    const { value, version, params, timestamp } = rp;
+    const parsedVersion = version ? new Version(...version) : null;
 
-    return new this(
-      value,
-      parsedVersion,
-      params,
-      new Date(timestamp),
-      new Date(postedTimestamp)
-    );
+    return new this(value, parsedVersion, params, new Date(timestamp));
   }
 
   constructor(
     value: number,
     version: Version | null,
     params: { [param: string]: string },
-    timestamp: Date,
-    postedTimestamp: Date
+    timestamp: Date
   ) {
-    this._value = value;
-    this._version = version;
-    this._params = params;
-    this._timestamp = timestamp;
-    this._postedTimestamp = postedTimestamp;
+    this.value = value;
+    this.version = version;
+    this.params = params;
+    this.timestamp = timestamp;
   }
 
   static ascVersion(left: Point, right: Point): number {
-    if (left._version && right._version) {
-      return Version.ordAsc(left._version, right._version);
+    if (left.version && right.version) {
+      return Version.ordAsc(left.version, right.version);
     } else {
       throw new Error(
         `cannot cmp points; at least one does not have a version. left: ${left}, right: ${right}`
@@ -47,6 +38,6 @@ export class Point {
 
   static ascTimestamp(left: Point, right: Point): number {
     // sad workaround for https://github.com/microsoft/TypeScript/issues/5710
-    return +left._timestamp - +right._timestamp;
+    return +left.timestamp - +right.timestamp;
   }
 }

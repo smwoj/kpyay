@@ -48,7 +48,7 @@ def compiled_server():
     compile_server()
 
 
-def _wait_until_responds(url: str, max_seconds: int = 10):
+def wait_until_responds(url: str, max_seconds: int = 10):
     assert max_seconds >= 1
     one_sleep = 200  # ms
     n_sleeps = int(max_seconds * 1000 / one_sleep)
@@ -65,24 +65,18 @@ def _wait_until_responds(url: str, max_seconds: int = 10):
     )
 
 
-@contextlib.contextmanager
-def running_server_cm(redis, proc_stderr=sys.stderr):
+@pytest.fixture
+def running_server(compiled_server, redis):
+    """ Provides a test server + Redis pair. """
     with Popen(
         [f"{SERVER_ROOT}/target/debug/server", redis], stdout=PIPE, stderr=PIPE
     ) as server_process:
         # TODO: allow port customization
         url = "http://127.0.0.1:8088"
-        _wait_until_responds(f"{url}/")
+        wait_until_responds(f"{url}/")
         yield url
         server_process.terminate()
-        proc_stderr.write(server_process.stderr.read().decode())
-
-
-@pytest.fixture
-def running_server(compiled_server, redis):
-    """ Provides a test server + Redis pair. """
-    with running_server_cm(redis) as url:
-        yield url
+        sys.stderr.write(server_process.stderr.read().decode())
 
 
 FIXED_TIMESTAMP_STR = "2020-04-29T12:06:23"
