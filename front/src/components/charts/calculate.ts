@@ -1,6 +1,7 @@
 import * as _ from "lodash";
 import { DefaultDict } from "../../lib/collections/DefaultDict";
 import { Point } from "../../models/Point";
+import { Version } from "../../models/Version";
 
 type NoChoiceParams = { [param: string]: string };
 type ParamVariants = { [param: string]: string[] };
@@ -8,6 +9,7 @@ type ParamVariants = { [param: string]: string[] };
 export interface ChartData {
   readonly data: { [key: string]: number | string }[];
   readonly xAccessor: "version" | "timestamp";
+  readonly xAxisSwitchable: boolean;
   readonly hashes: string[];
   readonly noChoiceParams: NoChoiceParams;
   readonly paramsToVariants: ParamVariants;
@@ -38,6 +40,7 @@ export const partitionByVariants = (paramsToVariants: {
   );
   return [noChoice, withVariants];
 };
+
 export const paramsHash = (params: { [param: string]: string }): string => {
   return Object.keys(params)
     .sort()
@@ -49,6 +52,8 @@ export const calculate = (
   points: Point[],
   xAccessor: "version" | "timestamp"
 ): ChartData => {
+  const xAxisSwitchable = points.some((p) => p.version);
+
   const groups = new DefaultDict<Point[]>(() => []);
   const group: (p: Point) => string | undefined =
     xAccessor === "version"
@@ -77,17 +82,29 @@ export const calculate = (
   points.forEach((p) => {
     hashes.add(relevantParamsHash(p));
   });
+  const transformedGroups = _.map(groups.data, (points, accessorValue) => {
+    const data: any = _.fromPairs(
+      points.map((p) => [relevantParamsHash(p), p.value])
+    );
+    data[xAccessor] = accessorValue;
+    return data;
+  });
+  const sortedGroups = transformedGroups.sort((grA, grB) => {
+    if (xAccessor === "version") {
+      return Version.ordAsc(
+        Version.parse(grA.version),
+        Version.parse(grB.version)
+      );
+    } else {
+      return Date.parse(grA.timestamp) > Date.parse(grB.timestamp);
+    }
+  });
 
   return {
-    data: _.map(groups.data, (ps, xacc) => {
-      const data: any = _.fromPairs(
-        ps.map((p) => [relevantParamsHash(p), p.value])
-      );
-      data[xAccessor] = xacc;
-      return data;
-    }),
+    data: sortedGroups,
     hashes: [...hashes],
     xAccessor,
+    xAxisSwitchable,
     noChoiceParams,
     paramsToVariants,
   };

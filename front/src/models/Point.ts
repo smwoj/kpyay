@@ -1,6 +1,11 @@
 import { Version } from "./Version";
 import { ResponsePoint } from "../backendApi";
 
+const ascDate = (left: Date, right: Date): number => {
+  // sad workaround for https://github.com/microsoft/TypeScript/issues/5710
+  return +left - +right;
+};
+
 export class Point {
   readonly value: number;
   readonly version: Version | null;
@@ -37,7 +42,6 @@ export class Point {
   }
 
   static ascTimestamp(left: Point, right: Point): number {
-    // sad workaround for https://github.com/microsoft/TypeScript/issues/5710
-    return +left.timestamp - +right.timestamp;
+    return ascDate(left.timestamp, right.timestamp);
   }
 }

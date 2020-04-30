@@ -84,11 +84,14 @@ function ConfigButtons(props: { data: ChartData; spec: ChartSpec }) {
       spec={spec}
     />
   ));
+  const switchAxisButton = data.xAxisSwitchable ? (
+    <SwitchXAxisButton spec={spec} />
+  ) : null;
 
   return (
     <div className="config-buttons-div">
       <DeleteButton spec={spec} />
-      <SwitchXAxisButton spec={spec} />
+      {switchAxisButton}
       {selectDropdowns}
       {splitByButtons}
     </div>
