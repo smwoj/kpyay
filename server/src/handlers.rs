@@ -1,6 +1,6 @@
 use super::db::CLIENT;
 use super::primitives::*;
-use actix_web::{web, HttpResponse};
+use actix_web::{http, web, HttpResponse};
 use redis::AsyncCommands;
 
 // TODO: get rid of ALL THESE UNWRAPS
@@ -27,7 +27,9 @@ pub async fn get_points(metric: web::Path<String>) -> HttpResponse {
         .map(|s| serde_json::from_str(&s).unwrap())
         .collect::<Vec<Point>>();
 
-    HttpResponse::Ok().body(serde_json::json!(points).to_string())
+    HttpResponse::Ok()
+        .set_header(http::header::CONTENT_TYPE, "text/json")
+        .body(serde_json::json!(points).to_string())
 }
 
 pub async fn add_point(metric: web::Path<String>, payload_bytes: web::Bytes) -> HttpResponse {
@@ -99,7 +101,9 @@ pub async fn get_view(view_name: web::Path<String>) -> HttpResponse {
     }
     let res: String = conn.lindex(&key, 0).await.unwrap();
 
-    HttpResponse::Ok().body(res)
+    HttpResponse::Ok()
+        .set_header(http::header::CONTENT_TYPE, "text/json")
+        .body(res)
 }
 
 pub async fn root() -> HttpResponse {
