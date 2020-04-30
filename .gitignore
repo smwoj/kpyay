@@ -4,6 +4,7 @@
 server/project/**
 server/target/**
 
+**/dist/**
 **/.ipynb_checkpoints/**
 **/venv/**
 **/__pycache__/**
