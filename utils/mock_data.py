@@ -1,23 +1,9 @@
-import random, doctest, itertools
+import random, doctest, itertools, math
+from itertools import starmap, chain, product, repeat
 from more_itertools import take
 from datetime import datetime, timedelta
-from typing import NamedTuple, Optional, Dict, Iterable
-
-
-class Point(NamedTuple):
-    value: float
-    timestamp: datetime
-    posted_ts: datetime
-    version: Optional[str]
-    params: Dict[str, str]
-
-    def json_dict(self) -> Dict[str, str]:
-        def fmt_if_datetime(value):
-            return value.isoformat() if isinstance(value, datetime) else value
-
-        return {
-            field: fmt_if_datetime(value) for field, value in self._asdict().items()
-        }
+from typing import Dict, Iterable, List, Optional, TypeVar
+from api import Point, ChartConfig
 
 
 def versions() -> Iterable[str]:
@@ -38,27 +24,22 @@ def versions() -> Iterable[str]:
     )
 
 
-def timestamps(
+def rand_ints(prev: int) -> Iterable[int]:
+    """
+    # https://www.ams.org/journals/mcom/1999-68-225/S0025-5718-99-00996-5/S0025-5718-99-00996-5.pdf
+    """
+    assert prev != 0
+    modulus = 4194301
+    multiplier = 360889
+    while True:
+        prev = multiplier * prev % modulus
+        yield prev
+
+
+def datetimes(
     zero_time=datetime(year=2020, month=1, day=12), time_step=timedelta(days=1)
 ) -> Iterable[datetime]:
     return (zero_time + n * time_step for n in itertools.count())
-
-
-def datestamps(
-    day_zero: datetime = datetime(year=2020, month=1, day=12)
-) -> Iterable[str]:
-    """
-    >>> take(2, datestamps())
-    ['2020-01-12', '2020-01-13']
-
-    >>> take(3, datestamps(day_zero=datetime(2030, 12, 31)))
-    ['2030-12-31', '2031-01-01', '2031-01-02']
-    """
-
-    def fmt(date: datetime):
-        return date.strftime("%Y-%m-%d")
-
-    return map(fmt, timestamps(day_zero))
 
 
 def asympt_approaching_1(
@@ -79,35 +60,117 @@ def asympt_approaching_1(
     return filter(within_range, map(y, itertools.count()))
 
 
-def datestamped_points(
-    values: Iterable[float],
-    timestamps: Iterable[datetime],
-    delays: Iterable[timedelta],
-    *,
-    params: Dict[str, str],
-) -> Iterable[Point]:
-    return (
-        Point(value, timestamp, timestamp + delay, version=None, params=params)
-        for value, timestamp, delay, version in zip(
-            values, timestamps, delays, versions
-        )
-    )
+def sins(a: float = 1, b: float = 0.1) -> Iterable[float]:
+    for x in itertools.count():
+        yield a * math.sin(x * b)
 
 
-def versioned_points(
+def logs(a: float = 1.0, b: float = 10, c: float = 0.0) -> Iterable[float]:
+    for x in itertools.count():
+        arg = x * b - c
+        yield a * math.log(max(1 / 1000, arg))
+
+
+def squares(a: float = 1.0, b: float = 0.0, c: float = 0.0) -> Iterable[float]:
+    for x in itertools.count():
+        yield a * x ** 2 + b * x + c
+
+
+nones = lambda: repeat(None)
+# hatetris
+
+
+T = TypeVar("T")
+
+
+def flatten(*iterables: Iterable[T]) -> Iterable[T]:
+    return chain.from_iterable(iterables)
+
+
+def flat_collect(*iterables: Iterable[T]) -> List[T]:
+    return list(flatten(*iterables))
+
+
+def mk_points(
+    n: int,
     values: Iterable[float],
-    timestamps: Iterable[timestamps],
-    delays: Iterable[timedelta],
-    *,
-    versions: Iterable[str],
-    params: Dict[str, str],
-) -> Iterable[Point]:
-    return (
-        Point(value, timestamp, timestamp + delay, version, params)
-        for value, timestamp, delay, version in zip(
-            values, timestamps, delays, versions
+    params: Iterable[Dict[str, str]],
+    timestamps: Optional[Iterable[datetime]] = None,
+    versions: Optional[Iterable[str]] = None,
+) -> List[Point]:
+    timestamps = timestamps or nones()
+    versions = versions or nones()
+    return take(n, starmap(Point.create, zip(values, params, timestamps, versions)))
+
+
+POINTS = {
+    "base": mk_points(20, logs(), repeat({})),
+    "sins-ts": flat_collect(
+        mk_points(10, sins(0.2), repeat({"flavour": "choco"})),
+        mk_points(10, sins(0.5), repeat({"flavour": "berry"})),
+        mk_points(10, sins(0.4), repeat({"flavour": "vanilla"})),
+    ),
+    "sins-versioned": flat_collect(
+        *(
+            mk_points(
+                10,
+                sins(sa, sb),
+                repeat(params),
+                timestamps=nones(),
+                versions=versions(),
+            )
+            for sa, sb, params in [
+                (0.2, 0.5, {"flavour": "veal"}),
+                (0.4, 0.6, {"flavour": "pork"}),
+                (0.3, 0.4, {"flavour": "venison"}),
+            ]
         )
-    )
+    ),
+    "sins-both": flat_collect(
+        *(
+            mk_points(
+                n,
+                sins(sa, sb),
+                repeat({"alcohol": alcohol}),
+                timestamps=datetimes(time_zero, timedelta(2)),
+                versions=versions(),
+            )
+            for n, sa, sb, alcohol, time_zero in [
+                (10, 0.2, 0.5, "cider", datetime(2020, 4, 20)),
+                (8, 0.4, 0.6, "wine", datetime(2020, 5, 2)),
+                (20, 0.3, 0.4, "rum", datetime(2020, 4, 12)),
+            ]
+        )
+    ),
+    "squarezzz": flat_collect(
+        *(
+            mk_points(
+                n,
+                squares(sa, sb),
+                repeat({"alcohol": alcohol}),
+                timestamps=datetimes(time_zero, timedelta(2)),
+                versions=versions(),
+            )
+            for n, sa, sb, alcohol, time_zero in [
+                (10, 0.2, 0.5, "cider", datetime(2020, 4, 20)),
+                (8, 0.4, 0.6, "wine", datetime(2020, 5, 2)),
+                (20, 0.3, 0.4, "rum", datetime(2020, 4, 12)),
+            ]
+        )
+    ),
+}
+SHOW_ALL = [
+    # restrictions = {} mean all the points will be visible on the chart
+    # so the viewer will need to apply filters and splits before the view becomes usable
+    *(
+        ChartConfig(metric_id, x_accessor="timestamp", restrictions={})
+        for metric_id in POINTS.keys()
+    ),
+    *(
+        ChartConfig(metric_id, x_accessor="version", restrictions={})
+        for metric_id in ["squarezzz", "sins-versioned", "sins-both"]
+    ),
+]
 
 
 if __name__ == "__main__":

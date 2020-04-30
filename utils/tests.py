@@ -1,4 +1,4 @@
-import os, subprocess, pytest, requests, json, contextlib
+import os, sys, subprocess, pytest, requests, json, contextlib
 from datetime import datetime, timezone, timedelta
 from subprocess import PIPE, Popen
 from testing.redis import RedisServer
@@ -66,7 +66,7 @@ def _wait_until_responds(url: str, max_seconds: int = 10):
 
 
 @contextlib.contextmanager
-def running_server_cm(redis):
+def running_server_cm(redis, proc_stderr=sys.stderr):
     with Popen(
         [f"{SERVER_ROOT}/target/debug/server", redis], stdout=PIPE, stderr=PIPE
     ) as server_process:
@@ -75,7 +75,7 @@ def running_server_cm(redis):
         _wait_until_responds(f"{url}/")
         yield url
         server_process.terminate()
-        print(server_process.stderr.read().decode())
+        proc_stderr.write(server_process.stderr.read().decode())
 
 
 @pytest.fixture
