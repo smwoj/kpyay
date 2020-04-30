@@ -839,6 +839,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "kpyay-server"
+version = "0.1.0"
+dependencies = [
+ "actix-cors",
+ "actix-http",
+ "actix-rt",
+ "actix-web",
+ "chrono",
+ "env_logger",
+ "lazy_static",
+ "log",
+ "redis",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "language-tags"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -888,12 +905,6 @@ checksum = "31e24f1ad8321ca0e8a1e0ac13f23cb668e6f5466c2c57319f6a5cf1cc8e3b1c"
 dependencies = [
  "linked-hash-map",
 ]
-
-[[package]]
-name = "maplit"
-version = "1.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
 
 [[package]]
 name = "match_cfg"
@@ -1268,24 +1279,6 @@ dependencies = [
  "itoa",
  "serde",
  "url",
-]
-
-[[package]]
-name = "server"
-version = "0.1.0"
-dependencies = [
- "actix-cors",
- "actix-http",
- "actix-rt",
- "actix-web",
- "chrono",
- "env_logger",
- "lazy_static",
- "log",
- "maplit",
- "redis",
- "serde",
- "serde_json",
 ]
 
 [[package]]

@@ -17,7 +17,6 @@ async fn main() -> std::io::Result<()> {
             .route("/views/{configName}", web::get().to(handlers::get_view))
             .route("/views/{configName}", web::post().to(handlers::set_view))
             .route("/", web::get().to(handlers::root))
-            // TODO: /rename metric
             // https://docs.rs/actix-cors/0.2.0/actix_cors/index.html
             .wrap(Cors::new().allowed_methods(vec!["GET", "POST"]).finish())
             .wrap(Logger::default())

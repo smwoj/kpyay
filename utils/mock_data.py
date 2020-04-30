@@ -112,7 +112,7 @@ POINTS = {
         *(
             mk_points(
                 10,
-                sins(0.2*scale),
+                sins(0.2 * scale),
                 repeat({"flavour": flavour, "origin": origin}),
                 timestamps=datetimes(datetime(2018, 12, 24), timedelta(7)),
             )
@@ -121,7 +121,7 @@ POINTS = {
                     ["choco", "berry", "vanilla"],
                     ["Poland", "Russia", "Ukraine", "Belarus"],
                 ),
-                itertools.count()
+                itertools.count(),
             )
         )
     ),

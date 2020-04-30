@@ -39,7 +39,7 @@ pub async fn add_point(metric: web::Path<String>, payload_bytes: web::Bytes) -> 
             let bytes = payload_bytes.as_ref();
             let content_ref = std::str::from_utf8(bytes)
                 .map(|s| s.to_string())
-                .unwrap_or_else(|e| format!("not valid utf-8: '{:?}'", bytes));
+                .unwrap_or_else(|_e| format!("not valid utf-8: '{:?}'", bytes));
             return HttpResponse::BadRequest().body(format!(
                 "Payload is not a valid point: {}. Posted payload: '{:?}'",
                 e.to_string(),
@@ -71,7 +71,7 @@ pub async fn set_view(view_name: web::Path<String>, payload_bytes: web::Bytes) -
             let bytes = payload_bytes.as_ref();
             let content_ref = std::str::from_utf8(bytes)
                 .map(|s| s.to_string())
-                .unwrap_or_else(|e| format!("not valid utf-8: '{:?}'", bytes));
+                .unwrap_or_else(|_e| format!("not valid utf-8: '{:?}'", bytes));
             return HttpResponse::BadRequest().body(format!(
                 "Payload is not a valid view: {}. Posted payload: '{:?}'",
                 e.to_string(),

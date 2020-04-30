@@ -2,12 +2,11 @@ use redis::Client;
 
 fn parse_conn_str() -> String {
     // TODO: civilized CLI
-    std::env::args().skip(1).next().unwrap_or_else(|| {
+    std::env::args().nth(1).unwrap_or_else(|| {
         eprintln!("ERROR: Usage:\n\n\t server redis://127.0.0.1:5379/\n");
         std::process::exit(2);
     })
 }
-
 
 lazy_static::lazy_static! {
     pub static ref CONN_STR: String =  parse_conn_str();
@@ -29,8 +28,12 @@ pub fn assert_client_works() {
     match c.get_connection() {
         Ok(_) => eprintln!("Connected to {}", CONN_STR.as_str()),
         Err(e) => {
-            eprintln!("Cannot connect to {}. Error: {}", CONN_STR.as_str(), e.to_string());
+            eprintln!(
+                "Cannot connect to {}. Error: {}",
+                CONN_STR.as_str(),
+                e.to_string()
+            );
             std::process::exit(2);
-        },
+        }
     };
 }
