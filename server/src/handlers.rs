@@ -1,60 +1,107 @@
+use super::db::CLIENT;
 use super::primitives::*;
 use actix_web::{web, HttpResponse};
-
-use super::db::CLIENT;
 use redis::AsyncCommands;
 
+// TODO: get rid of ALL THESE UNWRAPS
+
 pub async fn get_points(metric: web::Path<String>) -> HttpResponse {
-    // 404 if not in redis
-    let mut conn: redis::aio::Connection  = CLIENT.get_async_connection().await.unwrap();
-    let key = format!("metrics/{}", metric);
-    let res : Vec<String> = conn.get(&key).await.unwrap();
-    // 404 if not in redis
-    HttpResponse::Ok().body(res.join("||"))
+    // TODO: assert metric matches correct regex
+    let mut conn: redis::aio::Connection = CLIENT.get_async_connection().await.unwrap();
+    let key = format!("points/{}", metric);
+    let metric_exists: bool = conn.exists(&key).await.unwrap();
+    if !metric_exists {
+        let existing_metrics: Vec<String> = conn.keys("points/*").await.unwrap();
+
+        // todo: provide suggestions with levenshtein
+        return HttpResponse::NotFound().body(format!(
+            "Points for metric '{}' not found. Existing metrics: {:?}",
+            metric, existing_metrics
+        ));
+    }
+    let points = conn
+        .lrange::<&str, Vec<String>>(&key, 0, -1)
+        .await
+        .unwrap()
+        .into_iter()
+        .map(|s| serde_json::from_str(&s).unwrap())
+        .collect::<Vec<Point>>();
+
+    HttpResponse::Ok().body(serde_json::json!(points).to_string())
 }
 
 pub async fn add_point(metric: web::Path<String>, payload_bytes: web::Bytes) -> HttpResponse {
-    let point: Point = match serde_json::from_slice(payload_bytes.as_ref()) {
+    let mut point: Point = match serde_json::from_slice(payload_bytes.as_ref()) {
         Ok(p) => p,
         Err(e) => {
-            return HttpResponse::BadRequest()
-                .body(format!("Content in invalid format: {}", e.to_string()))
-            // todo improve err messages
+            let bytes = payload_bytes.as_ref();
+            let content_ref = std::str::from_utf8(bytes)
+                .map(|s| s.to_string())
+                .unwrap_or_else(|e| format!("not valid utf-8: '{:?}'", bytes));
+            return HttpResponse::BadRequest().body(format!(
+                "Payload is not a valid point: {}. Posted payload: '{:?}'",
+                e.to_string(),
+                content_ref
+            ));
         }
     };
-    let mut conn : redis::aio::Connection= CLIENT.get_async_connection().await.unwrap();
+    point.fill_timestamp_if_missing();
+    let mut conn: redis::aio::Connection = CLIENT.get_async_connection().await.unwrap();
     let key = format!("points/{}", metric);
     let value = serde_json::to_string(&point).unwrap();
-    let _ : Result<(), _> = conn.lpush(&key, value).await;
+    let _: Result<(), _> = conn.lpush(&key, value).await;
 
     // check if params have legal values
     // validate with schema
     // check if redis/schemas match
 
-    HttpResponse::Ok().body(format!("OK, added {:?}", point))
+    HttpResponse::Created().body("")
 }
 
-pub async fn set_config(config_name: web::Path<String>, payload_bytes: web::Bytes) -> HttpResponse {
-    let value: serde_json::Value = match serde_json::from_slice(payload_bytes.as_ref()){
+pub async fn set_view(view_name: web::Path<String>, payload_bytes: web::Bytes) -> HttpResponse {
+    let view: View = match serde_json::from_slice(payload_bytes.as_ref()) {
         Ok(v) => v,
         Err(e) => {
-            return HttpResponse::BadRequest()
-                .body(format!("Content is not valid utf-8 json, detail: {}", e.to_string()));
+            // return HttpResponse::BadRequest().body(format!(
+            //     "Content is not valid utf-8 json, detail: {}",
+            //     e.to_string()
+            // ));
+            let bytes = payload_bytes.as_ref();
+            let content_ref = std::str::from_utf8(bytes)
+                .map(|s| s.to_string())
+                .unwrap_or_else(|e| format!("not valid utf-8: '{:?}'", bytes));
+            return HttpResponse::BadRequest().body(format!(
+                "Payload is not a valid view: {}. Posted payload: '{:?}'",
+                e.to_string(),
+                content_ref
+            ));
         }
     };
-    let mut conn : redis::aio::Connection= CLIENT.get_async_connection().await.unwrap();
-    let key = format!("configs/{}", config_name);
-    let json_value = serde_json::to_string(&value).unwrap();
-    let _ : Result<(), _> = conn.lpush(&key, &json_value).await;
+    let mut conn: redis::aio::Connection = CLIENT.get_async_connection().await.unwrap();
+    let key = format!("views/{}", view_name);
+    let json_value = serde_json::to_string(&view).unwrap();
+    let _: () = conn.lpush(&key, &json_value).await.unwrap();
 
-    HttpResponse::Ok().body(format!("OK, set_config {:?}={}", config_name, json_value))
+    HttpResponse::Created().body("")
 }
 
-pub async fn get_config(config_name: web::Path<String>) -> HttpResponse{
-    let mut conn : redis::aio::Connection = CLIENT.get_async_connection().await.unwrap();
-    let key = format!("configs/{}", config_name);
-    let res : String = conn.lindex(&key, -1).await.unwrap();
-    dbg!(&res);
-    // 404 if not in redis
+pub async fn get_view(view_name: web::Path<String>) -> HttpResponse {
+    let mut conn: redis::aio::Connection = CLIENT.get_async_connection().await.unwrap();
+    let key = format!("views/{}", view_name);
+    let view_exists: bool = conn.exists(&key).await.unwrap();
+    if !view_exists {
+        let existing_views: Vec<String> = conn.keys("views/*").await.unwrap();
+        // todo: provide suggestions with levenshtein
+        return HttpResponse::NotFound().body(format!(
+            "Config '{}' not found. Existing views: {:?}",
+            view_name, existing_views
+        ));
+    }
+    let res: String = conn.lindex(&key, 0).await.unwrap();
+
     HttpResponse::Ok().body(res)
+}
+
+pub async fn root() -> HttpResponse {
+    HttpResponse::Ok().body("Hello!")
 }
