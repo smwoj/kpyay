@@ -52,22 +52,22 @@ export const calculate = (
   const groups = new DefaultDict<Point[]>(() => []);
   const group: (p: Point) => string | undefined =
     xAccessor === "version"
-      ? (p: Point) => p._version?.toString()
-      : (p: Point) => p._timestamp.toISOString().slice(0, 19).replace("T", " ");
+      ? (p: Point) => p.version?.toString()
+      : (p: Point) => p.timestamp.toISOString().slice(0, 19).replace("T", " ");
   const variants = new DefaultDict<Set<string>>(() => new Set<string>());
 
   points.forEach((p) => {
     if (group(p)) {
       groups.get(group(p) as string).push(p);
     }
-    _.forEach(p._params, (value, param) => {
+    _.forEach(p.params, (value, param) => {
       variants.get(param).add(value);
     });
   });
   const [noChoiceParams, paramsToVariants] = partitionByVariants(variants.data);
 
   const relevantParamsHash = (p: Point): string => {
-    const hashableParams = Object.entries(p._params).filter(([param, val]) =>
+    const hashableParams = Object.entries(p.params).filter(([param, val]) =>
       paramsToVariants.hasOwnProperty(param)
     );
     return paramsHash(_.fromPairs(hashableParams));
@@ -81,7 +81,7 @@ export const calculate = (
   return {
     data: _.map(groups.data, (ps, xacc) => {
       const data: any = _.fromPairs(
-        ps.map((p) => [relevantParamsHash(p), p._value])
+        ps.map((p) => [relevantParamsHash(p), p.value])
       );
       data[xAccessor] = xacc;
       return data;

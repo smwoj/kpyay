@@ -6,17 +6,37 @@ import stringify from "json-stable-stringify";
 
 const BACKEND_URL = "http://127.0.0.1:8088";
 
+export interface ResponsePoint {
+  value: number;
+  version: [number, number, number] | null;
+  params: { [param: string]: string };
+  timestamp: string;
+}
+
 export async function getMetricData(metricId: string): Promise<Point[]> {
   const response = await axios.get(`${BACKEND_URL}/points/${metricId}`);
-  console.log(`getMetricData() -> ${stringify(response.data)}`);
-  return response.data;
+  console.log(`getMetricData(${metricId}) -> ${stringify(response.data)}`);
+  return response.data.map((rp: ResponsePoint) => Point.fromResponse(rp));
+}
+
+export interface BackendChartSpec {
+  metric_id: string;
+  restrictions: { [param: string]: string };
+  xAccessor: string;
 }
 
 export async function saveView(
   viewName: string,
   config: BFSet<ChartSpec>
 ): Promise<void> {
-  return await axios.post(`${BACKEND_URL}/views/${viewName}`, config._items);
+  const view = config._items.map((spec) => {
+    return {
+      metric_id: spec.metricId,
+      restrictions: spec.restrictions,
+      x_accessor: spec.xAccessor,
+    };
+  });
+  return await axios.post(`${BACKEND_URL}/views/${viewName}`, view);
 }
 
 interface ViewResponse {

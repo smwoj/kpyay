@@ -34,7 +34,7 @@ const configsToCharts = (
     const { restrictions, xAccessor } = spec;
     const isOk = (p: Point): boolean => {
       return _.entries(restrictions).every(([param, value]) => {
-        return p._params[param] === value;
+        return p.params[param] === value;
       });
     };
     const points = cache[metricId].filter(isOk);
