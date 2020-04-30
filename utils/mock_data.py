@@ -102,11 +102,28 @@ def mk_points(
 
 
 POINTS = {
-    "f-score": mk_points(70, asympt_approaching_1(), repeat({}), timestamps=datetimes(datetime(2018, 12, 24), timedelta(7))),
+    "f-score": mk_points(
+        70,
+        asympt_approaching_1(),
+        repeat({}),
+        timestamps=datetimes(datetime(2018, 12, 24), timedelta(7)),
+    ),
     "sins-ts": flat_collect(
-        mk_points(10, sins(0.2), repeat({"flavour": "choco"}), timestamps=datetimes(datetime(2018, 12, 24), timedelta(7))),
-        mk_points(10, sins(0.5), repeat({"flavour": "berry"}),timestamps=datetimes(datetime(2019, 2, 10), timedelta(7))),
-        mk_points(10, sins(0.4), repeat({"flavour": "vanilla"}),timestamps=datetimes(datetime(2019, 4, 16), timedelta(7))),
+        *(
+            mk_points(
+                10,
+                sins(0.2*scale),
+                repeat({"flavour": flavour, "origin": origin}),
+                timestamps=datetimes(datetime(2018, 12, 24), timedelta(7)),
+            )
+            for (flavour, origin), scale in zip(
+                product(
+                    ["choco", "berry", "vanilla"],
+                    ["Poland", "Russia", "Ukraine", "Belarus"],
+                ),
+                itertools.count()
+            )
+        )
     ),
     "sins-versioned": flat_collect(
         *(
@@ -118,9 +135,9 @@ POINTS = {
                 versions=versions(),
             )
             for sa, sb, params in [
-                (0.2, 0.5, {"flavour": "veal"}),
-                (0.4, 0.6, {"flavour": "pork"}),
-                (0.3, 0.4, {"flavour": "venison"}),
+                (0.2, 0.5, {"meat": "veal"}),
+                (0.4, 0.6, {"meta": "pork"}),
+                (0.3, 0.4, {"meta": "venison"}),
             ]
         )
     ),
