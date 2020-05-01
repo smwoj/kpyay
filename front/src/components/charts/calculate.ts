@@ -82,9 +82,9 @@ export const calculate = (
   points.forEach((p) => {
     hashes.add(relevantParamsHash(p));
   });
-  const transformedGroups = _.map(groups.data, (points, accessorValue) => {
+  const transformedGroups = _.map(groups.data, (ps, accessorValue) => {
     const data: any = _.fromPairs(
-      points.map((p) => [relevantParamsHash(p), p.value])
+      ps.map((p) => [relevantParamsHash(p), p.value])
     );
     data[xAccessor] = accessorValue;
     return data;
@@ -96,7 +96,7 @@ export const calculate = (
         Version.parse(grB.version)
       );
     } else {
-      return Date.parse(grA.timestamp) > Date.parse(grB.timestamp);
+      return +Date.parse(grA.timestamp) - +Date.parse(grB.timestamp);
     }
   });
 

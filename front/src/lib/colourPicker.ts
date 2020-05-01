@@ -10,7 +10,7 @@ const ColourPicker: string[] = Object.keys({
   // azure: "F0FFFF",
   // beige: "F5F5DC",
   // bisque: "FFE4C4",
-  black: "000000",
+  // black: "000000",
   // blanchedalmond: "FFEBCD",
   // chocolate: "D2691E",
   blue: "0000FF",

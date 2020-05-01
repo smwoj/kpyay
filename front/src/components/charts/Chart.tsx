@@ -16,7 +16,7 @@ import {
   SplitByButton,
   SelectDropdown,
   SwitchXAxisButton,
-} from "../viewConfig/chartButtons";
+} from "./chartButtons";
 import { ChartData } from "./calculate";
 import { connect } from "react-redux";
 import { Action } from "redux";

@@ -4,9 +4,9 @@ import { Input } from "antd";
 import {
   failedToFetchPointsAction,
   fetchedPointsAction,
-} from "../store/actions";
+} from "../../store/actions";
 import * as React from "react";
-import { getMetricData } from "../backendApi";
+import { getMetricData } from "../../backendApi";
 
 const { Search } = Input;
 

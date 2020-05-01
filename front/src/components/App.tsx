@@ -6,11 +6,11 @@ import { AppState, ChartSpec } from "../store/models";
 import { calculate } from "./charts/calculate";
 import "./../styles.css";
 import { HashRouter, Redirect, Route, Switch } from "react-router-dom";
-import MetricIdInput from "./MetricIdInput";
+import MetricIdInput from "./navBar/MetricIdInput";
 import * as _ from "lodash";
 import { Point } from "../models/Point";
 import stringify from "json-stable-stringify";
-import { SaveViewButton } from "./PersistViewButton";
+import { SaveViewButton } from "./navBar/PersistViewButton";
 import { useEffect, useState } from "react";
 import {
   setConfigAction,
@@ -19,7 +19,7 @@ import {
 } from "../store/actions";
 import { Action } from "redux";
 import { BFSet } from "../lib/collections/BFSet";
-import ToggleCfgVisibilityButton from "./ToggleCfgVisibility";
+import ToggleCfgVisibilityButton from "./navBar/ToggleCfgVisibility";
 import { getMetricData, loadView } from "../backendApi";
 
 const configsToCharts = (

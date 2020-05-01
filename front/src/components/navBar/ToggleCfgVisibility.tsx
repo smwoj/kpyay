@@ -1,9 +1,9 @@
 import { Action } from "redux";
 import { Button } from "antd";
-import { toggleCfgBtnVisibility } from "../store/actions";
+import { toggleCfgBtnVisibility } from "../../store/actions";
 import * as React from "react";
 import { connect } from "react-redux";
-import { AppState } from "../store/models";
+import { AppState } from "../../store/models";
 
 const ToggleCfgVisibilityButton = (props: {
   showConfigButtons: boolean;
