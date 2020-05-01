@@ -2,6 +2,9 @@ body {
     background: whitesmoke;
     /*font-family: 'Noto Sans', sans-serif;*/
 }
+h1 {
+    text-align: center;
+}
 .app-div{
     padding: 20px;
     margin: 10px 10px;

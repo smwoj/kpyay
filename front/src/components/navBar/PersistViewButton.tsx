@@ -33,7 +33,9 @@ const SaveView = (
   // TODO: fix - (new view name) - with predefined views it doesn't correctly show view name
   return (
     <Search
-      placeholder={currentViewName || "(new view name)"}
+      placeholder={
+        currentViewName ? `current view: ${currentViewName}` : "(new view name)"
+      }
       enterButton="Save"
       size="large"
       onSearch={(viewName) => {
@@ -51,6 +53,7 @@ const SaveView = (
             }
           );
         }
+        // clear search
       }}
     />
   );

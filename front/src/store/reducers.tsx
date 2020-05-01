@@ -125,7 +125,7 @@ const reduceSavedView = (state: AppState, action: ISavedView): AppState => {
   const { viewName } = action.payload;
   const msg = `Saved view: '${viewName}'`;
   console.log(msg);
-  return { ...state, last_message: msg };
+  return { ...state, viewName, last_message: msg };
 };
 
 const reduceShowMessage = (state: AppState, action: IShowMessage): AppState => {
@@ -151,6 +151,7 @@ const reduceFetchedConfig = (state: AppState, action: ISetConfig): AppState => {
   return {
     ...state,
     configs: config,
+    viewName: viewName,
     last_message: viewName ? `Loaded config '${viewName}'.` : "",
   };
 };

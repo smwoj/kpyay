@@ -102,8 +102,6 @@ const Spa = (
     match: any;
   }
 ) => {
-  const { viewName } = props;
-
   const chartWidth = 600;
   const chartHeight = 350;
 
@@ -124,10 +122,8 @@ const Spa = (
     );
   });
 
-  const viewHeader = viewName ? <h1>{viewName}</h1> : null;
   return (
     <div id="app-div">
-      {viewHeader}
       <div className="ui-bar">
         <div className="ui-bar-elem cfg-vis-btn">
           <ToggleCfgVisibilityButton />
@@ -168,7 +164,7 @@ const _PredefinedView = (props: {
         dispatch(showMessageAction(`Loaded view ${viewName}`));
         console.log("Loading view OK, rendering...");
         // @ts-ignore
-        setView(<App />);
+        setView(<Redirect to="/" />);
       },
       (err) => {
         dispatch(

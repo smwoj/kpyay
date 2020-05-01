@@ -7,6 +7,7 @@ import {
 } from "../../store/actions";
 import * as React from "react";
 import { getMetricData } from "../../backendApi";
+import stringify from "json-stable-stringify";
 
 const { Search } = Input;
 
@@ -26,7 +27,9 @@ const MetricIdInput = (props: {
           },
           (err) => {
             console.log("NO BUENO:", err);
-            props.dispatch(failedToFetchPointsAction(metricId, err.toString()));
+            props.dispatch(
+              failedToFetchPointsAction(metricId, stringify(err.response.data))
+            );
           }
         );
       }}
