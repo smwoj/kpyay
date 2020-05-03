@@ -1,6 +1,8 @@
 # KPYay - nanoscale data visualization.
 
-<img src="screenshots/main-ss.png" alt="demo-view"/>
+<div align="center">
+    <img src="screenshots/main-ss.png" alt="demo-view" width="90%"/>
+</div>
 
 A visualization project that aims to:
 - provide pretty, **easily adjustable dashboards,** 
@@ -22,8 +24,8 @@ In other words, you need to send it your data, but the API is as simple as it ge
 
     curl --data '{"value": 0.8967}' "$KPYAY_URL/points/sloths-vs-pastry-f-score"
     
-This will attach current timestamp to your measurement and add 
-it to data series associated with metric id `sloths-vs-pastry-f-score`. 
+This will attach current timestamp to your value and add 
+it to data series associated with metric `sloths-vs-pastry-f-score`. 
 
 You can also provide the timestamp ([RFC3339](https://tools.ietf.org/html/rfc3339) truncated to seconds) 
 yourself - e.g. when you already have some historical data you'd like to use:
@@ -40,15 +42,14 @@ The last part of the API is `params`:
 
     curl --data '{"value": 14.67, "params": {"soda": "pepsi"}}' "$KPYAY_URL/points/sodas-market-share"
 
-in this example `sodas-market-share` data series may consists of a few subseries
-parameterized by `soda=pepsi|coke|fanta|mountain-dew|...`.
+in this example `sodas-market-share` may contain series for each variant of `soda=pepsi|coke|fanta|mountain-dew|...`.
 
   
 >The only catch is that once a data point is submitted, all consecutive ones must stick to the same schema.
 >
 >E.g. if you POSTed `'{"value": 14.67, "params": {"soda": "pepsi"}}'` to `sodas-market-share`, 
 >all consecutive POSTs to `sodas-market-share` must:
->- provide `"params": {"soda": $SOME_STRING}` 
+>- provide `"params": {"soda": $SODA_VARIANT}` 
 >- omit `timestamp`,
 >- omit `version`.
 >
@@ -56,17 +57,20 @@ parameterized by `soda=pepsi|coke|fanta|mountain-dew|...`.
 
 
 ### Highly parameterized data
-With more than one `param` the chart readability may quickly get out of hand.
+With more than one `param` the chart readability may quickly get out of hand:
 
-This is not readable:
-
-<img src="screenshots/too-many-series.png" alt="demo-view"/>
+<div align="center">
+    <img src="screenshots/too-many-series.png" alt="demo-view" width="60%"/>
+</div>
 
 This project provides one-click way to transform this chart into more readable one(s) - 
-that's what the `split by` and `select` buttons are for.
+that's what the `split by` and `select` buttons do. Clicking "select candy-bar -> kitkat" results in:
 
-<img src="screenshots/split-by-country.png" alt="dashboard-after-splitting-by-country"/>
-<img src="screenshots/selected-kit-kat.png" alt="dashboard-after-selecting-kit-kat"/>
+<div align="center">
+    <img src="screenshots/selected-kit-kat.png" alt="dashboard-after-selecting-kit-kat" width="60%" />
+</div>
+
+Clicking "split-by -> kit-kat" would create three similar charts - one for each type of candy bar.
 
 ### How to run
 The easiest way is `python utils/spawn_test_server.py`, which also inserts demo content,
@@ -90,7 +94,7 @@ Compilation via container is another option:
     # running the front ent
     cd front && npm start
 
-Note this method - unlike `spawn_test_server.py` - doesn't insert demo content.
+This method - unlike `spawn_test_server.py` - doesn't insert demo content.
 
 ### Missing pieces
 - the front end could use some more prettification,
@@ -100,13 +104,12 @@ Note this method - unlike `spawn_test_server.py` - doesn't insert demo content.
 - unit tests coverage is poor (though there are some API integration tests)
 
 ### Extensions?
-- metric ids, parameter names and parameter values should be constrained with some regex, 
-but none clicked with me so far
+- metric ids, parameter names and parameter values should probably be constrained with some regex, 
 - it would be useful to be able to "move" data series.  
     Let's say you have collected some historical data on `no-metallica-concerts` in US, 
-    but you'd like to track it in other countries as well. 
+    but you decided to track it in other countries as well. 
     - original `no-metallica-concerts` metric could be "renamed" to `deprecated-$DATE--no-metallica-concerts`,
     - the content of `deprecated-$DATE--no-metallica-concerts` could be downloaded 
         and reposted with `"params": {"country": "US"}`, along with data for other countries.  
         
-    It would require storing adjustments to dashboard views to ensure even after a "rename" the same data still renders.
+    It would require handling these transformations for previously defined dashboards so they still show the same data.
