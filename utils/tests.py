@@ -69,7 +69,7 @@ def wait_until_responds(url: str, max_seconds: int = 10):
 def running_server(compiled_server, redis):
     """ Provides a test server + Redis pair. """
     with Popen(
-        [f"{SERVER_ROOT}/target/debug/server", redis], stdout=PIPE, stderr=PIPE
+        [f"{SERVER_ROOT}/target/debug/kpyay-server", redis], stdout=PIPE, stderr=PIPE
     ) as server_process:
         # TODO: allow port customization
         url = "http://127.0.0.1:8088"

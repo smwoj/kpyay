@@ -19,7 +19,7 @@ This script:
 @contextlib.contextmanager
 def running_server(redis: str):
     with Popen(
-        [f"{SERVER_ROOT}/target/debug/server", redis],
+        [f"{SERVER_ROOT}/target/debug/kpyay-server", redis],
         env={"RUST_LOG": "actix_web=debug"},
     ) as server_process:
         url = "http://127.0.0.1:8088"

@@ -4,18 +4,24 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Version(u16, u16, u16);
 
+pub type Params = std::collections::BTreeMap<String, String>;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Point {
     value: f64,
     version: Option<Version>,
     timestamp: Option<NaiveDateTime>,
-    params: std::collections::BTreeMap<String, String>,
+    params: Option<Params>,
 }
 
 impl Point {
-    pub fn fill_timestamp_if_missing(&mut self) {
+    // todo: introduce separate structs for API Point and db Point model - code below will be the conversion
+    pub fn fill_missing(&mut self) {
         if self.timestamp.is_none() {
             self.timestamp = Some(chrono::Utc::now().naive_utc());
+        }
+        if self.params.is_none() {
+            self.params = Some(Params::new());
         }
     }
 }
@@ -95,6 +101,7 @@ mod tests {
 #[cfg(test)]
 mod timestamp_tests {
     use super::*;
+    use chrono::{NaiveDate, NaiveTime};
 
     #[test]
     fn timestamp_deserialization_ok() {

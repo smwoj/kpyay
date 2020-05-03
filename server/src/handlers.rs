@@ -14,10 +14,15 @@ pub async fn get_points(metric: web::Path<String>) -> HttpResponse {
         let existing_metrics: Vec<String> = conn.keys("points/*").await.unwrap();
 
         // todo: provide suggestions with levenshtein
-        return HttpResponse::NotFound().body(format!(
-            "Points for metric '{}' not found. Existing metrics: {:?}",
-            metric, existing_metrics
-        ));
+        return HttpResponse::NotFound()
+            .set_header(http::header::CONTENT_TYPE, "text/json")
+            .body(serde_json::json!({
+                "detail":
+                    format!(
+                        "Points for metric '{}' not found. Existing metrics: {:?}",
+                        metric, existing_metrics
+                    )
+            }));
     }
     let points = conn
         .lrange::<&str, Vec<String>>(&key, 0, -1)
@@ -47,7 +52,7 @@ pub async fn add_point(metric: web::Path<String>, payload_bytes: web::Bytes) -> 
             ));
         }
     };
-    point.fill_timestamp_if_missing();
+    point.fill_missing();
     let mut conn: redis::aio::Connection = CLIENT.get_async_connection().await.unwrap();
     let key = format!("points/{}", metric);
     let value = serde_json::to_string(&point).unwrap();
@@ -94,10 +99,15 @@ pub async fn get_view(view_name: web::Path<String>) -> HttpResponse {
     if !view_exists {
         let existing_views: Vec<String> = conn.keys("views/*").await.unwrap();
         // todo: provide suggestions with levenshtein
-        return HttpResponse::NotFound().body(format!(
-            "Config '{}' not found. Existing views: {:?}",
-            view_name, existing_views
-        ));
+        return HttpResponse::NotFound()
+            .set_header(http::header::CONTENT_TYPE, "text/json")
+            .body(serde_json::json!({
+                "detail":
+                    format!(
+                        "Config '{}' not found. Existing views: {:?}",
+                        view_name, existing_views
+                    )
+            }));
     }
     let res: String = conn.lindex(&key, 0).await.unwrap();
 
