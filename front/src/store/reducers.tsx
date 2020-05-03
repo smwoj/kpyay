@@ -23,7 +23,7 @@ const INIT_STATE: AppState = {
   showConfigButtons: true,
   cache: {},
   configs: new BFSet([]),
-  last_message: "", // todo: make it expire
+  lastMessage: null,
 };
 
 const reduceInit = (state: AppState, action: Action): AppState => {
@@ -103,7 +103,10 @@ const reduceFailedToFetchPoints = (
 ): AppState => {
   const { metricId, msg } = action.payload;
   console.log(`FAILED TO FETCH POINTS FOR ${metricId}!!! msg: ${msg}`);
-  return { ...state, last_message: msg };
+  return {
+    ...state,
+    lastMessage: { message: msg, messageTimestamp: Date.now() },
+  };
 };
 
 const reduceSwitchXAxis = (state: AppState, action: ISwitchXAxis): AppState => {
@@ -123,15 +126,19 @@ const reduceSwitchXAxis = (state: AppState, action: ISwitchXAxis): AppState => {
 
 const reduceSavedView = (state: AppState, action: ISavedView): AppState => {
   const { viewName } = action.payload;
-  const msg = `Saved view: '${viewName}'`;
-  console.log(msg);
-  return { ...state, viewName, last_message: msg };
+  const message = `Saved view: '${viewName}'`;
+  console.log(message);
+  return {
+    ...state,
+    viewName,
+    lastMessage: { message, messageTimestamp: Date.now() },
+  };
 };
 
 const reduceShowMessage = (state: AppState, action: IShowMessage): AppState => {
-  const { message } = action.payload;
+  const { message, messageTimestamp } = action.payload;
   console.log(`Showing message: ${message}`);
-  return { ...state, last_message: message };
+  return { ...state, lastMessage: { message, messageTimestamp } };
 };
 
 const reduceFailedToSaveView = (
@@ -141,7 +148,10 @@ const reduceFailedToSaveView = (
   const { error, viewName } = action.payload;
   const msg = `Couldn't save view '${viewName}'. Error: ${error}`;
   console.log(msg);
-  return { ...state, last_message: msg };
+  return {
+    ...state,
+    lastMessage: { message: msg, messageTimestamp: Date.now() },
+  };
 };
 const reduceFetchedConfig = (state: AppState, action: ISetConfig): AppState => {
   const { config, viewName } = action.payload;
@@ -150,9 +160,9 @@ const reduceFetchedConfig = (state: AppState, action: ISetConfig): AppState => {
   console.log(msg);
   return {
     ...state,
+    viewName,
     configs: config,
-    viewName: viewName,
-    last_message: viewName ? `Loaded config '${viewName}'.` : "",
+    lastMessage: viewName ? `Loaded config '${viewName}'.` : "",
   };
 };
 const reduceToggleCfgBtnVisibility = (

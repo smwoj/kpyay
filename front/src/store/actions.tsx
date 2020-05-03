@@ -88,13 +88,14 @@ export const failedToSaveViewAction = (
 export interface IShowMessage extends Action {
   payload: {
     message: string;
+    messageTimestamp: number;
   };
 }
 
 export const showMessageAction = (message: string): IShowMessage => {
   return {
     type: ActionTypes.SHOW_MESSAGE,
-    payload: { message },
+    payload: { message, messageTimestamp: Date.now() },
   };
 };
 

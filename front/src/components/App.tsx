@@ -76,25 +76,33 @@ const executeView = async (viewName: string, dispatch: (a: Action) => void) => {
   dispatch(setConfigAction(viewName, cfg));
 };
 
-const TransientMessage = (props: { message: string }) => {
+const _TransientMessage = (props: {
+  message: { message: string; messageTimestamp: number } | null;
+}) => {
+  const { message } = props;
   const [leftSeconds, setLeftSeconds] = useState(5);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setLeftSeconds(leftSeconds ? leftSeconds - 1 : 0);
     }, 1000);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+    };
   }, [leftSeconds]);
 
   const dots = ".".repeat(leftSeconds);
   const empty = " ";
 
-  return (
+  return message ? (
     <span className="disappearing-msg">
-      <p>{leftSeconds > 0 ? dots + props.message + dots : empty}</p>
+      <p>{leftSeconds > 0 ? dots + message.message + dots : empty}</p>
     </span>
-  );
+  ) : null;
 };
+const TransientMessage = connect((s: AppState) => ({ message: s.lastMessage }))(
+  _TransientMessage
+);
 
 const Spa = (
   props: AppState & {
@@ -135,7 +143,7 @@ const Spa = (
           <SaveViewButton />
         </div>
       </div>
-      <TransientMessage message={props.last_message} key={props.last_message} />
+      <TransientMessage />
       <section className="charts-grid">{charts}</section>
     </div>
   );
