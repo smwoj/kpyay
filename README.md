@@ -1,7 +1,6 @@
-#KPYay - nanoscale data visualization.
+# KPYay - nanoscale data visualization.
 
-// screenshot
-
+<img src="screenshots/main-ss.png" alt="demo-view"/>
 
 A visualization project that aims to:
 - provide pretty, **easily adjustable dashboards,** 
@@ -59,14 +58,39 @@ parameterized by `soda=pepsi|coke|fanta|mountain-dew|...`.
 ### Highly parameterized data
 With more than one `param` the chart readability may quickly get out of hand.
 
-
 This is not readable:
-//screenshot z wieloma naraz
+
+<img src="screenshots/too-many-series.png" alt="demo-view"/>
 
 This project provides one-click way to transform this chart into more readable one(s) - 
 that's what the `split by` and `select` buttons are for.
-//screen
-/screen
+
+<img src="screenshots/split-by-country.png" alt="dashboard-after-splitting-by-country"/>
+<img src="screenshots/selected-kit-kat.png" alt="dashboard-after-selecting-kit-kat"/>
+
+### How to run
+The easiest way is `python utils/spawn_test_server.py`, which also inserts demo content,
+but it requires installed Rust 1.43 toolchain, redis-server and a few python packages.
+
+Compilation via container is another option:
+
+    # compiling
+    cd ./server
+    docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder cargo build
+
+    # running Redis + server
+    REDIS_PORT=9000
+    docker run -d \
+        -p $REDIS_PORT:6379 \
+        --name=kpyay-redis \
+        -v kpyay-redis-vol:/data \
+        redis
+    ./target/x86_64-unknown-linux-musl/debug/kpyay-server redis://127.0.0.1:$REDIS_PORT/
+
+    # running the front ent
+    cd front && npm start
+
+Note this method - unlike `spawn_test_server.py` - doesn't insert demo content.
 
 ### Missing pieces
 - the front end could use some more prettification,
@@ -77,7 +101,7 @@ that's what the `split by` and `select` buttons are for.
 
 ### Extensions?
 - metric ids, parameter names and parameter values should be constrained with some regex, 
-none clicked with me so far
+but none clicked with me so far
 - it would be useful to be able to "move" data series.  
     Let's say you have collected some historical data on `no-metallica-concerts` in US, 
     but you'd like to track it in other countries as well. 

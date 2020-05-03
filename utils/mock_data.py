@@ -108,24 +108,25 @@ POINTS = {
         repeat({}),
         timestamps=datetimes(datetime(2018, 12, 24), timedelta(7)),
     ),
-    "sins-ts": flat_collect(
+    "crunch-factor-rating": flat_collect(
         *(
             mk_points(
                 10,
-                sins(0.2 * scale),
-                repeat({"flavour": flavour, "origin": origin}),
+                sins(0.2 * scale, sin_b),
+                repeat({"candy-bar": bar, "country": country}),
                 timestamps=datetimes(datetime(2018, 12, 24), timedelta(7)),
             )
-            for (flavour, origin), scale in zip(
+            for (bar, country), scale, sin_b in zip(
                 product(
-                    ["choco", "berry", "vanilla"],
-                    ["Poland", "Russia", "Ukraine", "Belarus"],
+                    ["mars", "twix", "kit-kat"],
+                    ["Poland", "Germany", "Czech", "Austria"],
                 ),
                 itertools.count(),
+                (n **2 % 10 / 20 for n in itertools.count()),
             )
         )
     ),
-    "sins-versioned": flat_collect(
+    "lispiness": flat_collect(
         *(
             mk_points(
                 10,
@@ -135,41 +136,41 @@ POINTS = {
                 versions=versions(),
             )
             for sa, sb, params in [
-                (0.2, 0.5, {"meat": "veal"}),
-                (0.4, 0.6, {"meta": "pork"}),
-                (0.3, 0.4, {"meta": "venison"}),
+                (0.2, 0.5, {"lisp": "clojure"}),
+                (0.4, 0.6, {"lisp": "scheme"}),
+                (0.3, 0.4, {"lisp": "racket"}),
             ]
         )
     ),
-    "sins-both": flat_collect(
+    "fluffiness": flat_collect(
         *(
             mk_points(
                 n,
                 sins(sa, sb),
-                repeat({"alcohol": alcohol}),
+                repeat({"language": language}),
                 timestamps=datetimes(time_zero, timedelta(2)),
                 versions=versions(),
             )
-            for n, sa, sb, alcohol, time_zero in [
-                (10, 0.2, 0.5, "cider", datetime(2020, 4, 20)),
-                (8, 0.4, 0.6, "wine", datetime(2020, 5, 2)),
-                (20, 0.3, 0.4, "rum", datetime(2020, 4, 12)),
+            for n, sa, sb, language, time_zero in [
+                (10, 0.2, 0.5, "javascript", datetime(2020, 4, 20)),
+                (8, 0.4, 0.6, "c++", datetime(2020, 5, 2)),
+                (20, 0.3, 0.4, "scala", datetime(2020, 4, 12)),
             ]
         )
     ),
-    "squarezzz": flat_collect(
+    "debugging-frustration": flat_collect(
         *(
             mk_points(
                 n,
                 squares(sa, sb),
-                repeat({"alcohol": alcohol}),
+                repeat({"language": language}),
                 timestamps=datetimes(time_zero, timedelta(2)),
                 versions=versions(),
             )
-            for n, sa, sb, alcohol, time_zero in [
-                (10, 0.2, 0.5, "cider", datetime(2020, 4, 20)),
-                (8, 0.4, 0.6, "wine", datetime(2020, 5, 2)),
-                (20, 0.3, 0.4, "rum", datetime(2020, 4, 12)),
+            for n, sa, sb, language, time_zero in [
+                (10, 0.2, 0.5, "fortran", datetime(2020, 4, 20)),
+                (8, 0.4, 0.6, "ada", datetime(2020, 5, 2)),
+                (20, 0.3, 0.4, "cobol", datetime(2020, 4, 12)),
             ]
         )
     ),
@@ -183,7 +184,7 @@ SHOW_ALL = [
     ),
     *(
         ChartConfig(metric_id, x_accessor="version", restrictions={})
-        for metric_id in ["squarezzz", "sins-versioned", "sins-both"]
+        for metric_id in ["lispiness", "fluffiness", "debugging-frustration"]
     ),
 ]
 

@@ -3,7 +3,7 @@ use redis::Client;
 fn parse_conn_str() -> String {
     // TODO: civilized CLI
     std::env::args().nth(1).unwrap_or_else(|| {
-        eprintln!("ERROR: Usage:\n\n\t server redis://127.0.0.1:5379/\n");
+        eprintln!("ERROR: Usage:\n\n\t kpyay-server redis://127.0.0.1:5379/\n");
         std::process::exit(2);
     })
 }
