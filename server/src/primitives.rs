@@ -38,6 +38,7 @@ pub type View = Vec<Config>;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chrono::{NaiveDate, NaiveTime};
     use std::collections::BTreeMap;
 
     #[test]
@@ -49,11 +50,14 @@ mod tests {
             println!("{}", parsed.as_ref().err().unwrap())
         };
         let p = parsed.unwrap();
-        assert_eq!(p.params, BTreeMap::new());
+        assert_eq!(p.params, Some(BTreeMap::new()));
         assert_eq!(p.version, Some(Version(1, 2, 3)));
         assert_eq!(
             p.timestamp,
-            DateTime::parse_from_rfc3339("1996-12-19T16:39:57-08:00")
+            Some(NaiveDateTime::new(
+                NaiveDate::from_ymd(1996, 12, 19),
+                NaiveTime::from_hms(16, 39, 57)
+            ))
         );
     }
 
@@ -68,12 +72,15 @@ mod tests {
         let p = parsed.unwrap();
         assert_eq!(
             p.params,
-            btreemap! {"team".to_string() => "wege".to_string()}
+            Some(maplit::btreemap! {"team".to_string() => "wege".to_string()})
         );
         assert_eq!(p.version, None);
         assert_eq!(
             p.timestamp,
-            DateTime::parse_from_rfc3339("1996-12-19T16:39:57-08:00")
+            Some(NaiveDateTime::new(
+                NaiveDate::from_ymd(1996, 12, 19),
+                NaiveTime::from_hms(16, 39, 57)
+            ))
         );
     }
 
@@ -85,16 +92,6 @@ mod tests {
         if !&parsed.is_ok() {
             println!("{}", parsed.as_ref().err().unwrap())
         };
-        let p = parsed.unwrap();
-        assert_eq!(
-            p.params,
-            btreemap! {"team".to_string() => "wege".to_string()}
-        );
-        assert_eq!(p.version, None);
-        assert_eq!(
-            p.timestamp,
-            DateTime::parse_from_rfc3339("1996-12-19T16:39:57-08:00")
-        );
     }
 }
 
