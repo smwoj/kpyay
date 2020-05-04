@@ -56,7 +56,7 @@ mod tests {
             p.timestamp,
             Some(NaiveDateTime::new(
                 NaiveDate::from_ymd(1996, 12, 19),
-                NaiveTime::from_hms(16, 39, 57)
+                NaiveTime::from_hms(16, 39, 57),
             ))
         );
     }
@@ -79,7 +79,7 @@ mod tests {
             p.timestamp,
             Some(NaiveDateTime::new(
                 NaiveDate::from_ymd(1996, 12, 19),
-                NaiveTime::from_hms(16, 39, 57)
+                NaiveTime::from_hms(16, 39, 57),
             ))
         );
     }
