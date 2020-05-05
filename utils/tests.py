@@ -3,7 +3,7 @@ from datetime import datetime, timezone, timedelta
 from subprocess import PIPE, Popen
 from testing.redis import RedisServer
 
-from api import ServerClient, Point, ChartConfig
+from api import ServerClient, Point, ChartConfig, KPYayError
 
 """
 This is an integration test suite. 
@@ -306,3 +306,36 @@ def test_posting_corruputed_view(running_server):
         )._asdict(),
     )
     assert response.status_code == 400, f"Response text:\n '''{response.text}'''"
+
+
+@pytest.mark.parametrize(
+    "p2",
+    [
+        Point(value=0.75, params={}, timestamp=None, version=None,),  # missing param
+        Point(  # redundant param
+            value=0.75,
+            params={"lang": "suahili", "dialect": "something"},
+            timestamp=datetime.fromisoformat("2020-04-29T12:06:23"),
+            version=None,
+        ),
+        Point(  # once timestamp is omitted, it must always be omitted
+            value=0.75,
+            params={"lang": "suahili"},
+            timestamp=datetime.fromisoformat("2020-04-29T12:06:23"),
+            version=None,
+        ),
+        Point(  # once version is omitted, it must always be omitted
+            value=0.75, params={"lang": "suahili"}, timestamp=None, version=(1, 2, 3),
+        ),
+    ],
+)
+def test_posting_points_with_different_schema(
+    client_to_existing_content: ServerClient, p2: Point
+):
+    p1 = Point(value=0.75, params={"lang": "suahili"}, timestamp=None, version=None,)
+
+    # first post should be OK - it defines the schema
+    client_to_existing_content.post_point("blabla", p1)
+
+    with pytest.raises(KPYayError):
+        client_to_existing_content.post_point("blabla", p2)
