@@ -162,7 +162,7 @@ const reduceFetchedConfig = (state: AppState, action: ISetConfig): AppState => {
     ...state,
     viewName,
     configs: config,
-    lastMessage: viewName ? `Loaded config '${viewName}'.` : "",
+    lastMessage: viewName ? {message: `Loaded config '${viewName}'.`, messageTimestamp: Date.now()}: null,
   };
 };
 const reduceToggleCfgBtnVisibility = (
