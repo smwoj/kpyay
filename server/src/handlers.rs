@@ -52,15 +52,33 @@ pub async fn add_point(metric: web::Path<String>, payload_bytes: web::Bytes) -> 
             ));
         }
     };
-    point.fill_missing();
+    let point_schema = point.to_schema();
     let mut conn: redis::aio::Connection = CLIENT.get_async_connection().await.unwrap();
+
+    // handle schema mismatch or insert new if necessary
+    let schema_key = format!("schemas/{}", &metric);
+    if conn.exists(&schema_key).await.unwrap() {
+        let schema_json: String = conn.get(&schema_key).await.unwrap();
+        let existing_schema: PointSchema = serde_json::from_str(&schema_json).unwrap();
+        if existing_schema != point_schema {
+            return HttpResponse::BadRequest().body(format!(
+                "Point(s) for this metric were already posted with different schema: {:?}.\
+                Schema of posted point: {:?}",
+                &existing_schema, &point_schema,
+            ));
+        }
+    } else {
+        conn.set(&schema_key, serde_json::to_string(&point_schema).unwrap())
+            .await
+            .unwrap()
+    }
+
+    point.fill_missing();
     let key = format!("points/{}", metric);
     let value = serde_json::to_string(&point).unwrap();
     let _: Result<(), _> = conn.lpush(&key, value).await;
 
-    // check if params have legal values
-    // validate with schema
-    // check if redis/schemas match
+    // todo: check if params have legal values
 
     HttpResponse::Created().body("")
 }
@@ -69,10 +87,6 @@ pub async fn set_view(view_name: web::Path<String>, payload_bytes: web::Bytes) -
     let view: View = match serde_json::from_slice(payload_bytes.as_ref()) {
         Ok(v) => v,
         Err(e) => {
-            // return HttpResponse::BadRequest().body(format!(
-            //     "Content is not valid utf-8 json, detail: {}",
-            //     e.to_string()
-            // ));
             let bytes = payload_bytes.as_ref();
             let content_ref = std::str::from_utf8(bytes)
                 .map(|s| s.to_string())

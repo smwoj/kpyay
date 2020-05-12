@@ -1,5 +1,6 @@
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeSet;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Version(u16, u16, u16);
@@ -14,14 +15,32 @@ pub struct Point {
     params: Option<Params>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct PointSchema {
+    has_version: bool,
+    has_timestamp: bool,
+    params: BTreeSet<String>,
+}
+
 impl Point {
     // todo: introduce separate structs for API Point and db Point model - code below will be the conversion
+    // or customize the (de)serialization code with serde magic
     pub fn fill_missing(&mut self) {
         if self.timestamp.is_none() {
             self.timestamp = Some(chrono::Utc::now().naive_utc());
         }
         if self.params.is_none() {
             self.params = Some(Params::new());
+        }
+    }
+    pub fn to_schema(&self) -> PointSchema {
+        PointSchema {
+            has_version: self.version.is_some(),
+            has_timestamp: self.timestamp.is_some(),
+            params: match self.params {
+                None => BTreeSet::new(),
+                Some(ref params) => params.iter().map(|(key, _value)| key.to_owned()).collect(),
+            },
         }
     }
 }

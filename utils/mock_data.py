@@ -122,7 +122,7 @@ POINTS = {
                     ["Poland", "Germany", "Czech", "Austria"],
                 ),
                 itertools.count(),
-                (n **2 % 10 / 20 for n in itertools.count()),
+                (n ** 2 % 10 / 20 for n in itertools.count()),
             )
         )
     ),
