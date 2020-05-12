@@ -45,15 +45,13 @@ The last part of the API is `params`:
 in this example `sodas-market-share` may contain series for each variant of `soda=pepsi|coke|fanta|mountain-dew|...`.
 
   
->The only catch is that once a data point is submitted, all consecutive ones must stick to the same schema.
->
->E.g. if you POSTed `'{"value": 14.67, "params": {"soda": "pepsi"}}'` to `sodas-market-share`, 
->all consecutive POSTs to `sodas-market-share` must:
->- provide `"params": {"soda": $SODA_VARIANT}` 
->- omit `timestamp`,
->- omit `version`.
->
-> (this integrity check is not yet implemented, but essential for the design)
+The only catch is that once a data point is submitted, all consecutive ones must stick to the same schema.
+
+E.g. if you POSTed `'{"value": 14.67, "params": {"soda": "pepsi"}}'` to `sodas-market-share`, 
+all consecutive POSTs to `sodas-market-share` must:
+- provide `"params": {"soda": $SODA_VARIANT}` 
+- omit `timestamp`,
+- omit `version`.
 
 
 ### Highly parameterized data
